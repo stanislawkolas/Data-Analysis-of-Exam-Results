@@ -34,9 +34,17 @@ data %>%
 explanatory = ("Hours_Studied","Attendance", "Parental_Involvement","Access_to_Resources", "Extracurricular_Activities", "Sleep_Hours", 
                 "Previous_Scores", "Motivation_Level", "Internet_Access", "Tutoring_Sessions", "Family_Income", "Teacher_Quality", "School_Type",
                 "Peer_Influence", "Physical_Activity", "Learning_Disabilities", "Parental_Education_Level", "Distance_from_Home", "Gender")
-dependent = "Exam_Score"\
+dependent = "Exam_Score"
 data %>% 
   missing_pairs(dependent, explanatory)
 ###
 data %>% 
   missing_pairs(dependent, explanatory, position= "fill",)
+
+explanatory = c("Hours_Studied", "Attendance", "Sleep_Hours", "Previous_Scores", "Tutoring_Sessions", "Physical_Activity")
+dependent = "Exam_Score"
+data %>% 
+  missing_pairs(dependent, explanatory)
+
+boxplot( data$Sleep_Hours, data$Tutoring_Sessions, data$Physical_Activity, col ="green", xlab = "various data", ylab = "Scale")
+boxplot (data$Attendance, data$Previous_Scores, data$Exam_Score, col ="red")
