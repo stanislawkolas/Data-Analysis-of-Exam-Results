@@ -48,3 +48,14 @@ data %>%
 
 boxplot( data$Sleep_Hours, data$Tutoring_Sessions, data$Physical_Activity, col ="green", xlab = "various data", ylab = "Scale")
 boxplot (data$Attendance, data$Previous_Scores, data$Exam_Score, col ="red")
+
+#instalujemy pakiety
+install.packages("dlookr")
+install.packages("editrules") #reguły
+install.packages("VIM")
+install.packages("validata")
+
+library(dlookr)
+library(editrules)
+library(VIM)
+library(validata)
