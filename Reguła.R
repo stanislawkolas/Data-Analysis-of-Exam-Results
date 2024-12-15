@@ -1,6 +1,10 @@
+#wywołanie danych z csv
 data <- read.csv(file = "czynniki.csv")
 
+#stworzenie ramki danych którymi się zajmujemy
 data <- data.frame(data)
+
+#biblioteki potzrebne do imputacji danych
 install.packages("dlookr")
 install.packages("editrules") #reguły
 install.packages("VIM")
@@ -13,7 +17,7 @@ library(validate)
 
 
 summary(data)
-
+# ustalenie zasad według których dane mają być imputowane oraza jeżeli dane wyrastają poza skalę oznaczane będą jako błedy
 RULE <- validator(Hours_Studied >= 0, 
                     Hours_Studied <= 30,
                   Attendance >= 0,
@@ -42,15 +46,32 @@ RULE <- validator(Hours_Studied >= 0,
                   
 summary(data)
 View(data)
+
+#sprawdzenie ilości danych które nie odpowidaja powyższym regułom ustalonym mna podtawie eksperckiej analizy
 out   <- confront(data, RULE)
 plot(out)
 summary(out)
+
+#zamiana danych typu character na factor
 install.packages("dplyr")
 library(dplyr)
 data <- data %>%
   mutate_if(is.character, as.factor)
 str(data)
-data[localizeErrors(RULE, data)$adapt] <-NA
+
+#zastąpienie błędów na NA
 install.packages("errorlocate")
 library(errorlocate)
 data_no_error <- replace_errors(data,RULE)
+summary(data_no_error)
+
+#imputacja danych przez hotdeck
+library(VIM)
+czyste_dane <- hotdeck(data_no_error)
+View(czyste_dane)
+#sprawdzenie czy wszytskie NA zostały zastąpione danymi przez hotdeck
+czyste_dane %>%
+  dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
+                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
+                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
+  finalfit::missing_plot()
