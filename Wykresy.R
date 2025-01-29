@@ -1,3 +1,7 @@
+
+#zapisanie pliku do csv
+write.csv(czyste_dane, "czyste_dane.csv")
+
 # Ładowanie bibliotek
 library(dplyr)
 library(ggplot2)
@@ -11,7 +15,7 @@ czyste_dane <- czyste_dane %>%
   )) %>%
   mutate(grupa1 = factor(grupa1, levels = c("poniżej 16", "16-23", "powyżej 23")))
 
-# Dodanie kolumny 'grupa2' (podział według ocen)
+# Dodanie kolumny 'grupa2' (podział Exam_Score według ocen)
 czyste_dane <- czyste_dane %>%
   mutate(grupa2 = case_when(
     Exam_Score < 60 ~ "2.0",
@@ -23,6 +27,19 @@ czyste_dane <- czyste_dane %>%
     TRUE ~ "Brak danych"
   )) %>%
   mutate(grupa2 = factor(grupa2, levels = c("2.0", "3.0", "3.5", "4.0", "4.5", "5.0")))
+
+# Dodanie kolumny 'grupa3' (podział Previous_Scores według ocen)
+czyste_dane <- czyste_dane %>%
+  mutate(grupa3 = case_when(
+    Previous_Scores < 60 ~ "2.0",
+    Previous_Scores >= 60 & Previous_Scores <= 65 ~ "3.0",
+    Previous_Scores >= 66 & Previous_Scores <= 70 ~ "3.5",
+    Previous_Scores >= 71 & Previous_Scores <= 80 ~ "4.0",
+    Previous_Scores >= 81 & Previous_Scores <= 90 ~ "4.5",
+    Previous_Scores >= 91 ~ "5.0",
+    TRUE ~ "Brak danych"
+  )) %>%
+  mutate(grupa3 = factor(grupa3, levels = c("2.0", "3.0", "3.5", "4.0", "4.5", "5.0")))
 
 # 1. Wykres: Wpływ godzin nauki na wynik egzaminu
 ggplot(czyste_dane, aes(x = grupa1, y = Exam_Score, fill = grupa1)) +
@@ -102,4 +119,56 @@ ggplot(czyste_dane, aes(x = grupa2, y = Exam_Score, color = grupa2)) +
   ) +
   scale_color_brewer(palette = "Set1")
 
-table(czyste_dane$grupa2)
+
+# Tworzymy tabelę częstości
+library(kableExtra)
+library(dplyr)
+
+tabela_kable <- table(czyste_dane$grupa2, czyste_dane$Extracurricular_Activities) 
+
+# Konwersja tabeli na ramkę danych
+tabela_df <- as.data.frame.matrix(tabela_kable)
+
+# Tabela częstości zajęć dodatkowych dla każdej z ocen
+kable(tabela_df, format = "html", caption = "Tabela częstości zajęć dodatkowych dla każdej oceny") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed")) %>%
+  row_spec(0, bold = TRUE, background = "#D3D3D3") %>% 
+  row_spec(seq(1, nrow(tabela_df), 2), background = "#F0F8FF") 
+
+#Tworzenie tabeli 2
+tabela_kable2 <- table( czyste_dane$Access_to_Resources, czyste_dane$grupa2) 
+
+# Konwersja tabeli na ramkę danych
+tabela_df2 <- as.data.frame.matrix(tabela_kable2)
+#Tabela częstości dostępu do zasobów dla każdej z ocen
+kable(tabela_df, format = "html", caption = "Tabela częstości dostępu do zasobów dla każdej z ocen") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed")) %>%
+  row_spec(0, bold = TRUE, background = "#D3D3D3") %>%
+  row_spec(seq(1, nrow(tabela_df), 2), background = "#F0F8FF") 
+
+#Histogram stworzony za pomocą biblioteki ggstatsplot
+#na potrzeby wykresu zamiana danych na numeryczne
+czyste_dane$grupa2num <- as.numeric(as.character(czyste_dane$grupa2))
+library(ggstatsplot)
+gghistostats(czyste_dane, 
+             x= grupa2num,
+             binwidth =0.5,
+             xlab = "Skala ocen",
+             title = "Analiza rozkładu ocen",
+             caption = NULL,
+             type = "parametric",
+             bf.message = FALSE
+             )
+#Histogram stworzony za pomocą biblioteki ggstatsplot
+#na porzeby wykresu zamiana danych na numeryczne
+czyste_dane$grupa3num <- as.numeric(as.character(czyste_dane$grupa3))
+gghistostats(czyste_dane, 
+             x= grupa3num,
+             binwidth =0.5,
+             xlab = "Skala ocen",
+             title = "Analiza rozkładu ocen poprzedniego egzaminu",
+             caption = NULL,
+             type = "parametric",
+             bf.message = FALSE
+)
+
