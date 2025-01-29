@@ -37,6 +37,7 @@ summary_table <- data %>%
 
 # Wyświetlenie tabeli
 summary_tablesummary_tablesummary_tablesummary_table
+summary_table
 
 # Instalacja i załadowanie wymaganych pakietów
 install.packages("tidyverse")
