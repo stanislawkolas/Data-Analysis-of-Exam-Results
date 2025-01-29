@@ -2,9 +2,14 @@ install.packages("gtsummary")
 library(gtsummary)
 library(tidyverse)
 library(dplyr)
+library(readr)
+
+czyste_dane_ft <- read_csv("czyste_dane_ft.csv")
+View(czyste_dane_ft)
 
 # Zamiana kolumn typu character na factor
 data <- data %>%
+czyste_dane_ft <- czyste_dane %>%
   mutate(across(where(is.character), as.factor))
 
 # Tworzenie tabeli podsumowującej
