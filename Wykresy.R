@@ -146,7 +146,7 @@ kable(tabela_df, format = "html", caption = "Tabela częstości dostępu do zaso
   row_spec(0, bold = TRUE, background = "#D3D3D3") %>%
   row_spec(seq(1, nrow(tabela_df), 2), background = "#F0F8FF") 
 
-#Histogram stworzony za pomocą biblioteki ggstatsplot
+# 7.Histogram stworzony za pomocą biblioteki ggstatsplot
 #na potrzeby wykresu zamiana danych na numeryczne
 czyste_dane$grupa2num <- as.numeric(as.character(czyste_dane$grupa2))
 library(ggstatsplot)
@@ -159,7 +159,7 @@ gghistostats(czyste_dane,
              type = "parametric",
              bf.message = FALSE
              )
-#Histogram stworzony za pomocą biblioteki ggstatsplot
+# 8.Histogram stworzony za pomocą biblioteki ggstatsplot
 #na porzeby wykresu zamiana danych na numeryczne
 czyste_dane$grupa3num <- as.numeric(as.character(czyste_dane$grupa3))
 gghistostats(czyste_dane, 
@@ -171,4 +171,26 @@ gghistostats(czyste_dane,
              type = "parametric",
              bf.message = FALSE
 )
+#9. Wykres zależności grupa 2 od Internet_Access
+ggplot(czyste_dane, aes(x = Internet_Access, y = Exam_Score, fill = Exam_Score)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Zależność wyniku egzaminu od dostępu do internetu",
+    x = "Dostęp do internetu",
+    y = "Ocena z egzaminu"
+  ) +
+  scale_fill_brewer(palette = "Set5") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+#10. Wykres zależności Exam_Score od Access_to_Resources
+ggplot(czyste_dane, aes(x = Access_to_Resources, y = Exam_Score, fill = Exam_Score)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Zależność wyniku egzaminu od dostępu do zasobów",
+    x = "Dostęp do zasobów",
+    y = "Ocena z egzaminu"
+  ) +
+  scale_fill_brewer(palette = "Set5") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
