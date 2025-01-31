@@ -11,7 +11,7 @@ View(czyste_dane_ft)
 
 # Zamiana kolumn typu character na factor
 data <- data %>%
-czyste_dane_ft <- czyste_dane %>%
+czyste_dane <- czyste_dane %>%
   mutate(across(where(is.character), as.factor))
 
 # Tworzenie tabeli podsumowującej
@@ -61,7 +61,7 @@ cor_attendance <- cor.test(czyste_dane_ft$Attendance, czyste_dane_ft$Exam_Score,
 # 3. Zależność wyniku egzaminu od liczby sesji korepetycji (test korelacji Spearmana)
 cor_tutoring <- cor.test(czyste_dane_ft$Tutoring_Sessions, czyste_dane_ft$Exam_Score, method = "spearman")
 
-# 4. Liczba wyników egzaminu w zależności od typu szkoły (test ANOVA)
+# 4. Liczba wyników egzaminu w zależności od typu szkoły (test ANOVA) nieistotne stat
 anova_school <- aov(Exam_Score ~ School_Type, data = czyste_dane_ft)
 anova_summary <- summary(anova_school)
 
@@ -94,7 +94,7 @@ ggstatsplot::ggscatterstats(
 ggstatsplot::ggbetweenstats(
   data = czyste_dane_ft,
   x = School_Type,
-  y = Exam_Score,
+  y = grupa2,
   type = "parametric",  # ANOVA (lub zmień na "nonparametric" dla Kruskala-Wallisa)
   title = "Porównanie wyników egzaminów w różnych typach szkół",
   bf.message = FALSE
@@ -114,7 +114,7 @@ ggstatsplot::ggscatterstats(
 ggstatsplot::ggscatterstats(
   data = czyste_dane_ft,
   x = Attendance,
-  y = Exam_Score,
+  y = grupa2,
   type = "spearman",
   title = "Zależność wyniku egzaminu od frekwencji",
   bf.message = FALSE
@@ -127,3 +127,16 @@ ggstatsplot::ggpiestats(
   title = "Procentowy udział uczniów z zaburzeniami uczenia się",
   bf.message = FALSE
 )
+
+
+# Regresja liniowa z wszystkimi czynnikami
+model <- lm(Exam_Score ~ Hours_Studied + Attendance + Parental_Involvement + 
+              Access_to_Resources + Extracurricular_Activities + Sleep_Hours + 
+              Previous_Scores + Motivation_Level + Internet_Access + Tutoring_Sessions + 
+              Family_Income + Teacher_Quality + School_Type + Peer_Influence + 
+              Physical_Activity + Learning_Disabilities + Parental_Education_Level + 
+              Distance_from_Home + Gender, 
+            data=czyste_dane)
+
+# Podsumowanie wyników regresji
+summary(model)
