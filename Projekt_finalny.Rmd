@@ -1,0 +1,88 @@
+---
+title: "Wyniki Egzaminów"
+author: "Bartosz Kurzyński, Jakub Kołpaczyński, Stanisław Kolas"
+date: "2025-01-30"
+output: html_document
+---
+
+# Analiza czynników wpływających na wyniki uczniów
+
+## Wstęp
+
+Celem naszego projektu jest analiza czynników wpływających na wyniki uczniów. W tym celu wykorzystamy zbiór danych zawierający informacje o uczniach, takie jak płeć, liczbę godzin nauki, frekwencję na zajęciach, liczbę godzin snu, itp. Naszym celem jest zbadanie, które z tych czynników mają największy wpływ na wyniki uczniów.
+
+### Metodologia
+
+Analiza obejmuje:
+
+-   Wstępne przygotowanie danych
+
+-   Zbadanie jakości danych oraz ocenę brakujących wartości
+
+-   Imputowanie brakujących wartości oraz standaryzację danych
+
+-   Wizualizację danych
+
+-   Analizę opisową
+
+-   Wnioskowanie statystyczne
+
+## Wstępne przygotowanie danych
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Wczytanie danych
+data <- read.csv(file = "czynniki.csv")
+# Stworzenie ramki danych którymi się będziemy zajmować
+data <- data.frame(data)
+```
+
+Po wstępnym załadowaniu danych należy sprawdzić, czy wszystkie kolumny zostały poprawnie wczytane.
+
+```{r}
+head(data)
+```
+
+Instalowanie wszystkich bibliotek potrzebnych do analizy.
+
+```{r include=FALSE}
+install.packages("tidyverse")
+install.packages("finalfit")
+install.packages("dlookr")
+install.packages("editrules")
+install.packages("VIM")
+install.packages("validata")
+install.packages("ggplot2")
+install.packages("hrbrthemes") 
+install.packages("plotly")
+install.packages("ISLR")
+install.packages("gapminder")
+install.packages("dplyr")
+install.packages("errorlocate")
+install.packages("kableExtra")
+install.packages("ggstatsplot")
+install.packages("gtsummary")
+install.packages("tidyverse")
+install.packages("readr")
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
