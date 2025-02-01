@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 required_packages <- c("dplyr", "ggplot2", "finalfit", "VIM", "validate", 
         "errorlocate", "tidyverse", "ggcorrplot", "forcats",
         "ggthemes","tidyverse","dlookr","editrules","hrbrthemes","plotly",
-        "ISLR","gapminder","kableExtra","ggstatsplot","gtsummary","readr")
+        "ISLR","gapminder","kableExtra","ggstatsplot","gtsummary","readr","moments")
 
 # Sprawdzenie i instalacja brakujących pakietów
 install_if_missing <- function(pkg) {
@@ -52,6 +52,7 @@ library(kableExtra)
 library(ggstatsplot)
 library(gtsummary)
 library(readr)
+library(moments)
 ```
 
 # Analiza czynników wpływających na wyniki z egzaminów studentów
@@ -363,12 +364,37 @@ ggplot(czyste_dane, aes(x = Exam_Score)) +
   theme_minimal()
 ```
 
+```{r echo=FALSE}
+#Statystyki opisowe
+exam_score_stats <- summary(czyste_dane$Exam_Score)
+std_dev <- sd(czyste_dane$Exam_Score)  # Odchylenie standardowe
+skewness <- moments::skewness(czyste_dane$Exam_Score)  # Skośność
+kurtosis <- moments::kurtosis(czyste_dane$Exam_Score)  # Kurtoza
+
+# Wyświetlenie statystyk
+cat("Statystyki opisowe dla 'Exam_Score':\n")
+print(exam_score_stats)
+cat("\nOdchylenie standardowe:", std_dev)
+cat("\nSkośność:", skewness)
+cat("\nKurtoza:", kurtosis)
+```
+
+-   Wyniki są skoncentrowane wokół średniej (67.23), z relatywnie małym
+    rozrzutem (odchylenie standardowe 3.83).
+
+-   Wysoka skośność i kurtoza wskazują na asymetryczność rozkładu i
+    możliwe wartości odstające w wyższych wynikach (np. wyniki 90+).
+
+-   Wyniki poniżej 60 oraz powyżej 90 mogą wymagać bliższego zbadania,
+    aby określić, czy są to uczniowie ze szczególnymi trudnościami lub
+    osiągający wyjątkowe wyniki.
+
 ### Analiza korelacji między zmiennymi
 
 W celu oceny, które zmienne są najsilniej powiązane z wynikami
 egzaminacyjnymi, oszcowano model regresji liniowej.
 
-```{r echo=FALSE}
+```{r include=FALSE}
 czyste_dane <- czyste_dane %>%
   mutate_if(is.character, as.factor)
 # Regresja liniowa z wszystkimi czynnikami
@@ -383,6 +409,19 @@ model <- lm(Exam_Score ~ Hours_Studied + Attendance + Parental_Involvement +
 summary(model)
 ```
 
+```{r echo=FALSE}
+summary_model <- summary(model)
+
+# Wyciągnięcie współczynników z modelu
+coefficients <- summary_model$coefficients
+
+# Sortowanie zmiennych według ich wpływu (absolutna wartość statystyki t)
+sorted_coefficients <- coefficients[order(abs(coefficients[, "t value"]), decreasing = TRUE), ]
+
+# Wyświetlenie 10 najważniejszych zmiennych
+head(sorted_coefficients, 10)
+```
+
 Model regresji liniowej przeprowadzony na dostępnych danych wykazał
 istotne zależności między wieloma czynnikami a wynikami egzaminacyjnymi
 uczniów. Model osiągnął R² = 0.6228, co oznacza, że około 62,3%
@@ -391,26 +430,39 @@ zmiennymi.
 
 Najistotniejsze czynniki wpływające na wynik egzaminu
 
--   Liczba godzin nauki (Estimate = 0.266, p \< 0.001) – Im więcej
-    godzin nauki, tym wyższy wynik egzaminacyjny. Jest to jeden z
-    najsilniejszych predyktorów.
--   Frekwencja na zajęciach (Estimate = 0.187, p \< 0.001) – Regularna
-    obecność w szkole istotnie koreluje z lepszymi wynikami.
--   Poprzednie wyniki (Estimate = 0.048, p \< 0.001) – Wyższe wyniki z
-    wcześniejszych testów przewidują lepsze rezultaty końcowe.
--   Dostęp do korepetycji (Estimate = 0.449, p \< 0.001) – Uczniowie
-    korzystający z dodatkowych lekcji osiągają lepsze wyniki.
--   Pozytywny wpływ rówieśników (Estimate = 0.957, p \< 0.001) –
-    Uczniowie przebywający w motywującym środowisku osiągają lepsze
-    wyniki.
--   Aktywność fizyczna (Estimate = 0.203, p \< 0.001) – Regularna
-    aktywność fizyczna wiąże się z nieco lepszymi wynikami.
+#### Kluczowe wnioski:
+
+1.  **Największy pozytywny wpływ na wyniki egzaminu mają:**
+
+    -   Frekwencja (`Attendance`).
+
+    -   Liczba godzin nauki (`Hours_Studied`).
+
+    -   Sesje korepetycji (`Tutoring_Sessions`).
+
+2.  **Negatywny wpływ na wyniki egzaminu mają:**
+
+    -   Brak dostępu do zasobów edukacyjnych (`Access_to_Resources`).
+
+    -   Niskie zaangażowanie rodziców (`Parental_Involvement`).
+
+    -   Niski poziom dochodów rodzinnych (`Family_Income`).
+
+3.  **Istotność zmiennych:** Wszystkie wymienione zmienne mają bardzo
+    niski poziom wartości p (`p-value < 0.001`), co świadczy o ich
+    wysokiej istotności statystycznej.
 
 ### Wpływ poszczególnych czynników na wyniki uczniów
 
 Przeanalizowano wpływ kluczowych czynników, takich jak liczba godzin
 nauki, frekwencja, dostęp do zasobów edukacyjnych oraz wsparcie rodziców
 na wyniki egzaminacyjne.
+
+```{r include=FALSE}
+czyste_dane$Access_to_Resources <- factor(czyste_dane$Access_to_Resources, levels = c("Low", "Medium", "High"))
+czyste_dane$Parental_Involvement <- factor(czyste_dane$Parental_Involvement, levels = c("Low", "Medium", "High"))
+czyste_dane$Family_Income <- factor(czyste_dane$Family_Income, levels = c("Low", "Medium", "High"))
+```
 
 **Analiza wpływu godzin nauki na wynik egzaminu**
 
@@ -421,6 +473,19 @@ ggplot(czyste_dane, aes(x = grupa1, y = Exam_Score, fill = grupa1)) +
   labs(title = "Wpływ liczby godzin nauki na wynik egzaminu",
        x = "Liczba godzin nauki",
        y = "Wynik egzaminu") +
+  theme_minimal()
+```
+
+```{r}
+#Liczba godzin nauki (Hours_Studied)
+ggplot(czyste_dane, aes(x = Hours_Studied, y = Exam_Score)) +
+  geom_point(alpha = 0.6, color = "orange") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    title = "Wpływ godzin nauki na wynik egzaminu",
+    x = "Godziny nauki",
+    y = "Wynik egzaminu"
+  ) +
   theme_minimal()
 ```
 
@@ -440,7 +505,39 @@ ggplot(czyste_dane, aes(x = grupa2, y = Attendance, fill = grupa2)) +
   theme_minimal()
 ```
 
-Wpływ zaangażowania rodziców na wynik egzaminu
+```{r}
+#Frekwencja (Attendance)
+ggplot(czyste_dane, aes(x = Attendance, y = Exam_Score)) +
+  geom_point(alpha = 0.6, color = "orange") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    title = "Wpływ frekwencji na wynik egzaminu",
+    x = "Frekwencja (%)",
+    y = "Wynik egzaminu"
+  ) +
+  theme_minimal()
+```
+
+Wpływ dostępu do zasobów edukacyjnych
+
+```{r}
+#Dostęp do zasobów edukacyjnych (Access_to_Resources)
+ggplot(czyste_dane, aes(x = Access_to_Resources, y = Exam_Score, fill = Access_to_Resources)) +
+  geom_boxplot(color = "black", alpha = 0.7) +
+  scale_fill_manual(values = c("Low" = "red", "Medium" = "orange", "High" = "green")) +
+  labs(
+    title = "Wpływ dostępu do zasobów edukacyjnych na wynik egzaminu",
+    x = "Dostęp do zasobów",
+    y = "Wynik egzaminu"
+  ) +
+  theme_minimal()
+```
+
+Uczniowie z niskim dostępem do zasobów mają znacznie niższe wyniki
+egzaminów w porównaniu do tych z wysokim dostępem. To jedna z kluczowych
+zmiennych negatywnych.
+
+Wpływ zaangażowania rodziców
 
 ```{r echo=FALSE}
 # Boxplot: Wpływ zaangażowania rodziców na wynik egzaminu
@@ -451,3 +548,98 @@ ggplot(czyste_dane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parenta
        y = "Wynik egzaminu") +
   theme_minimal()
 ```
+
+Podobny wzorzec jak w przypadku zasobów — niskie zaangażowanie rodziców
+wiąże się z niższymi wynikami.
+
+Wpływ dochodu rodziny na wynik egzaminu
+
+```{r}
+#Dochód rodziny (Family_Income)
+ggplot(czyste_dane, aes(x = Family_Income, y = Exam_Score, fill = Family_Income)) +
+  geom_boxplot(color = "black", alpha = 0.7) +
+  scale_fill_manual(values = c("Low" = "red", "Medium" = "orange", "High" = "green")) +
+  labs(
+    title = "Wpływ dochodu rodziny na wynik egzaminu",
+    x = "Dochód rodziny",
+    y = "Wynik egzaminu"
+  ) +
+  theme_minimal()
+```
+
+Uczniowie z rodzin o niskim dochodzie osiągają niższe wyniki
+egzaminacyjne w porównaniu do tych z rodzin o wyższym dochodzie.
+
+Wpływ korepetycji
+
+```{r message=FALSE, warning=FALSE}
+#Sesje korepetycji (Tutoring_Sessions)
+ggplot(czyste_dane, aes(x = Tutoring_Sessions, y = Exam_Score)) +
+  geom_point(alpha = 0.6, color = "orange") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    title = "Wpływ sesji korepetycji na wynik egzaminu",
+    x = "Sesje korepetycji",
+    y = "Wynik egzaminu"
+  ) +
+  theme_minimal()
+```
+
+Większa liczba sesji korepetycji wpływa pozytywnie na wyniki
+egzaminacyjne, choć efekt jest nieco słabszy.
+
+### Podsumowanie projektu
+
+Przeprowadzona analiza wyników egzaminacyjnych dostarczyła cennych
+informacji na temat czynników wpływających na sukces edukacyjny uczniów.
+Skoncentrowano się na sześciu kluczowych zmiennych, które w sposób
+istotny wpływają na wyniki: frekwencji, liczbie godzin nauki, liczbie
+sesji korepetycji, dostępie do zasobów edukacyjnych, zaangażowaniu
+rodziców oraz dochodzie rodziny.
+
+Najważniejszymi czynnikami pozytywnie wpływającymi na wyniki egzaminów
+okazały się frekwencja i liczba godzin nauki. Regularne uczęszczanie na
+zajęcia oraz poświęcanie czasu na naukę stanowiły fundamenty wysokich
+osiągnięć. Również sesje korepetycji w znacznym stopniu wspierały wyniki
+uczniów, co sugeruje, że dodatkowe wsparcie edukacyjne może odgrywać
+kluczową rolę w wyrównywaniu braków w wiedzy.
+
+Zidentyfikowano również istotne bariery w edukacji. Ograniczony dostęp
+do zasobów edukacyjnych, niski dochód rodziny oraz niskie zaangażowanie
+rodziców wiązały się z gorszymi wynikami egzaminacyjnymi. Czynniki te są
+szczególnie ważne w kontekście planowania polityk edukacyjnych i
+programów wsparcia.
+
+### Znaczenie analizy wyników egzaminacyjnych
+
+Zrozumienie czynników wpływających na wyniki egzaminacyjne jest kluczowe
+z kilku powodów:
+
+1.  **Optymalizacja strategii nauczania** Wyniki analizy mogą być
+    wykorzystane przez nauczycieli i decydentów edukacyjnych do
+    dostosowania metod nauczania do indywidualnych potrzeb uczniów. Na
+    przykład wsparcie uczniów z ograniczonym dostępem do zasobów
+    edukacyjnych może obejmować udostępnienie technologii i materiałów
+    dydaktycznych.
+
+2.  **Wsparcie dla uczniów w trudnej sytuacji** Identyfikacja kluczowych
+    czynników, takich jak niski dochód rodziny czy brak zaangażowania
+    rodziców, pozwala na wdrożenie programów wsparcia skierowanych do
+    najbardziej potrzebujących uczniów. Działania takie mogą obejmować
+    dodatkowe korepetycje, stypendia edukacyjne czy szkolenia dla
+    rodziców.
+
+3.  **Poprawa efektywności edukacji** Lepsze zrozumienie procesów
+    nauczania i czynników wpływających na wyniki pozwala na
+    skuteczniejsze zarządzanie systemem edukacyjnym. Analiza wyników
+    może służyć jako podstawa do projektowania polityk edukacyjnych,
+    które koncentrują się na najważniejszych obszarach wymagających
+    poprawy.
+
+Rekomendujemy dalsze inwestycje w programy wspierające uczniów z
+trudnymi warunkami socjoekonomicznymi oraz promowanie aktywnego
+zaangażowania rodziców w proces edukacji. Wyniki naszej analizy
+podkreślają potrzebę holistycznego podejścia do edukacji, które
+uwzględnia różnorodne czynniki wpływające na sukces uczniów. Tylko
+poprzez odpowiednie wsparcie możemy zapewnić równe szanse wszystkim
+uczniom i poprawić jakość edukacji jako całości.
