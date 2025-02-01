@@ -8,56 +8,57 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+# Wczytanie danych
+data <- read.csv(file = "czynniki.csv")
+# Stworzenie ramki danych którymi się będziemy zajmować
+data <- data.frame(data)
+```
+
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
 
-## R Markdown
+# Wczytywanie wymaganych pakietów
+required_packages <- c("dplyr", "ggplot2", "finalfit", "VIM", "validate", 
+        "errorlocate", "tidyverse", "ggcorrplot", "forcats",
+        "ggthemes","tidyverse","dlookr","editrules","hrbrthemes","plotly",
+        "ISLR","gapminder","kableExtra","ggstatsplot","gtsummary","readr")
 
-This is an R Markdown document. Markdown is a simple formatting syntax
-for authoring HTML, PDF, and MS Word documents. For more details on
-using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that
-includes both content as well as the output of any embedded R code
-chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to
-prevent printing of the R code that generated the plot.
-
-```r
-# Lista wymaganych pakietów
-required_packages <- c(
-  "dplyr", "ggplot2", "finalfit", "VIM", "validate", 
-  "errorlocate", "tidyverse", "ggcorrplot", "forcats", "ggthemes"
-)
-
-# Instalacja brakujących pakietów
-install_if_missing <- function(packages) {
-  new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
-  if (length(new_packages)) install.packages(new_packages, dependencies = TRUE)
+# Sprawdzenie i instalacja brakujących pakietów
+install_if_missing <- function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
 }
 
-install_if_missing(required_packages)
+sapply(required_packages, install_if_missing)
 
 # Załadowanie pakietów
-lapply(required_packages, library, character.only = TRUE)
+library(dplyr)
+library(ggplot2)
+library(finalfit)
+library(VIM)
+library(validate)
+library(errorlocate)
+library(tidyverse)
+library(ggcorrplot)
+library(forcats)
+library(ggthemes)
+library(dlookr)
+library(editrules)
+library(hrbrthemes)
+library(plotly)
+library(ISLR)
+library(gapminder)
+library(kableExtra)
+library(ggstatsplot)
+library(gtsummary)
+library(readr)
 ```
 
-#1. Wstęp
+# Analiza czynników wpływających na wyniki z egzaminów studentów
 
-##1.1. Cel projektu
+## Wstęp
+
+### Cel projektu
 
 Celem projektu jest analiza czynników wpływających na wyniki uczniów w
 egzaminach. Badanie ma na celu zidentyfikowanie, które zmienne, takie
@@ -66,7 +67,7 @@ największy wpływ na sukces akademicki. Wyniki analizy mogą pomóc w
 optymalizacji strategii edukacyjnych oraz wdrożeniu skutecznych metod
 wsparcia dla uczniów o niższych wynikach.
 
-###1.2. Opis problemu
+### Opis problemu
 
 Osiągnięcia akademickie uczniów są determinowane przez wiele czynników –
 zarówno indywidualnych, jak i środowiskowych. Trudności w nauce, poziom
@@ -75,7 +76,7 @@ pozalekcyjne mogą znacząco wpływać na ostateczne wyniki. Analiza tych
 czynników pozwoli na lepsze zrozumienie zależności i wsparcie uczniów w
 poprawie wyników.
 
-###1.3. Znaczenie analizy wyników uczniów
+### Znaczenie analizy wyników uczniów
 
 Zrozumienie czynników wpływających na wyniki egzaminacyjne jest istotne
 z kilku powodów:
@@ -90,16 +91,16 @@ czynników umożliwia wdrożenie skutecznych programów pomocy.
 Poprawa efektywności edukacji – lepsze zrozumienie procesów nauczania
 pozwala na skuteczniejsze zarządzanie systemem edukacyjnym.
 
-##2. Opis danych
+## Opis danych
 
-###2.1. Źródło danych
+### Źródło danych
 
 Dane wykorzystane w analizie pochodzą z anonimowego zbioru danych
 dotyczącego uczniów szkół średnich. Zawierają one informacje na temat
 wyników egzaminacyjnych oraz czynników potencjalnie wpływających na
 sukces akademicki.
 
-###2.2. Struktura zbioru danych
+### Struktura zbioru danych
 
 Zbiór danych zawiera następujące kolumny:
 
@@ -109,43 +110,84 @@ korepetycji, wynik egzaminu itp.
 Zmienne kategoryczne: Poziom zaangażowania rodziców, dostęp do zasobów
 edukacyjnych, typ szkoły, aktywności pozalekcyjne itp.
 
-###2.3. Opis zmiennych
+### Opis zmiennych
 
 Każda z analizowanych zmiennych pełni określoną funkcję w kontekście
 analizy wyników uczniów. Główne zmienne to:
 
-Hours_Studied – liczba godzin nauki tygodniowo.
+-   Hours Studied – liczba godzin nauki tygodniowo.
 
-Attendance – procentowa frekwencja na zajęciach.
+-   Attendance – procentowa frekwencja na zajęciach.
 
-Tutoring_Sessions – liczba godzin spędzonych na korepetycjach.
+-   Tutoring Sessions – liczba godzin spędzonych na korepetycjach.
 
-Parental_Involvement – poziom zaangażowania rodziców (Low, Medium,
-High).
+-   Parental Involvement – poziom zaangażowania rodziców (Low, Medium,
+    High).
 
-Access_to_Resources – dostęp do zasobów edukacyjnych (Low, Medium,
-High).
+-   Access to Resources – dostęp do zasobów edukacyjnych (Low, Medium,
+    High).
 
-Motivation_Level – poziom motywacji ucznia.
+-   Motivation Level – poziom motywacji ucznia.
 
-Previous_Scores – wyniki ucznia z poprzednich egzaminów.
+-   Previous Scores – wyniki ucznia z poprzednich egzaminów.
 
-Exam_Score – wynik końcowy z egzaminu.
+-   Exam Score – wynik końcowy z egzaminu.
 
 Dane te zostaną poddane dalszej analizie w celu określenia ich wpływu na
 końcowe wyniki uczniów.
 
-##3. Przygotowanie danych
+## Przygotowanie danych
 
-###3.1. Analiza zależności między zmiennymi
+### Wizualizacja brakujących danych
+
+Aby lepiej zrozumieć rozkład brakujących danych w naszym zbiorze,
+wykonujemy kilka analiz:
+
+-   Wykres `missing_plot()` przedstawia ogólny wzór brakujących wartości
+    dla kluczowych zmiennych.
+
+```{r echo=FALSE}
+data <- as.data.frame(data)
+
+data %>%
+  dplyr::select(Hours_Studied, Attendance, Parental_Involvement, Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
+                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
+                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
+  finalfit::missing_plot()
+```
+
+-   `missing_pattern()` pokazuje szczegółową strukturę braków.
+
+```{r echo=FALSE}
+data %>%
+  dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
+                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
+                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
+  finalfit::missing_pattern()
+```
+
+-   `VIM::aggr()` pozwala sprawdzić, które zmienne mają najwięcej
+    braków.
+
+```{r echo=FALSE}
+  # VIM method
+data %>%
+  dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
+                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
+                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
+  VIM::aggr(numbers = TRUE,
+             prop    = FALSE) 
+```
+
+### Analiza zależności między zmiennymi
 
 Analiza korelacji i zależności między zmiennymi pozwala określić, które
 czynniki mają największy wpływ na wyniki egzaminacyjne. Przeprowadzona
 analiza obejmuje obliczenie współczynników korelacji Spearmana dla
 kluczowych zmiennych oraz ich wpływu na wynik końcowy.
 
-``` r
-#obliczenie korelacji Spearmana dla wielu zmiennych 
+```{r echo=FALSE, korelacja include=FALSE}
+# Obliczenie korelacji Spearmana dla wielu zmiennych 
 cor_vars <- c("Hours_Studied", "Attendance", "Tutoring_Sessions",
 "Parental_Involvement", "Access_to_Resources", "Motivation_Level",
 "Internet_Access", "Previous_Scores", "Family_Income",
@@ -156,45 +198,89 @@ cor.test(czyste_dane[[var]],
 czyste_dane$Exam_Score, method = "spearman")$estimate })
 ```
 
-``` r
-#Wyświetlenie wyników korelacji 
+```{undefined echo=FALSE}
+# Wyniki korelacji 
 cor_results
 ```
 
-``` r
-#Plot Missing-ness
+```{r echo=FALSE}
+data <- as.data.frame(data)
+
 data %>%
-  dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
+  dplyr::select(Hours_Studied, Attendance, Parental_Involvement, Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
                 Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
                 Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
   finalfit::missing_plot()
 ```
 
-###3.2. Czyszczenie danych i imputacja brakujących wartości
+### Czyszczenie danych i imputacja brakujących wartości
+
+Pierwszą rzeczą jest ustalenie reguł dla wszystkich danych istniejących
+oraz imputowanych. Pozwala to na usunięcie wartości skrajnie
+odstających, które mogły być błędem przy wprowadzaniu danych.
+
+```{r include=FALSE}
+RULE <- validator(Hours_Studied >= 0, 
+                    Hours_Studied <= 30,
+                  Attendance >= 0,
+                    Attendance <= 100,
+                  Parental_Involvement %in% c("Low","Medium","High"),
+                  Access_to_Resources %in% c("Low", "Medium", "High"),
+                  Extracurricular_Activities %in% c("No","Yes"),
+                  Sleep_Hours >= 0, 
+                  Previous_Scores >= 0, 
+                    Previous_Scores<= 100, 
+                  Motivation_Level %in% c("Low","Medium","High"),
+                  Internet_Access %in% c("No","Yes"),
+                  Tutoring_Sessions >= 0,
+                  Family_Income %in% c("Low","Medium","High"),
+                  Teacher_Quality %in% c("Low","Medium","High"),
+                  School_Type %in% c("Public","Private"),
+                  Peer_Influence %in% c("Negative","Neutral","Positive"),
+                  Physical_Activity >= 0,
+                    Physical_Activity <= 25,
+                  Learning_Disabilities %in% c("No","Yes"),
+                  Parental_Education_Level %in% c("High School","College","Postgraduate"),
+                  Distance_from_Home %in% c("Near","Moderate","Far"),
+                  Gender %in% c("Male","Female"),
+                  Exam_Score >= 0,
+                  Exam_Score <= 100)
+
+#sprawdzenie ilości danych które nie odpowidaja powyższym regułom ustalonym mna podstawie eksperckiej analizy
+out   <- confront(data, RULE)
+
+#zamiana danych typu character na factor
+data <- data %>%
+  mutate_if(is.character, as.factor)
+
+#zastąpienie błędów na NA
+data_no_error <- replace_errors(data,RULE)
+
+#imputacja danych przez hotdeck
+czyste_dane <- hotdeck(data_no_error)
+```
+
+Po zastosowaniu zasad w jakich dane mają być skondensowane mogły
+wystąpić wartości puste (NA). Wartości te powstały w miejscach wartości,
+które nie spełniały powyższych zasad.
+
+Po uprzednim przygotowaniu danych oraz ich zidentyfikowaniu należy
+przejść do imputacji danych. Do imputacji wybrano metodę hotdeck, która
+polega na zastępowaniu brakujących wartości rzeczywistych danymi z tego
+samego zbioru.
 
 Przed przystąpieniem do analizy konieczne było usunięcie brakujących
 wartości oraz poprawienie błędów w danych.
 
-``` r
-#Sprawdzenie brakujących danych library(finalfit)
-  data %\>% dplyr::select(Hours_Studied, Attendance, Parental_Involvement,
-    Access_to_Resources, Extracurricular_Activities, Sleep_Hours,
-    Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions,
-    Family_Income, Teacher_Quality, School_Type, Peer_Influence,
-    Physical_Activity, Learning_Disabilities, Parental_Education_Level,
-    Distance_from_Home, Gender) %\>% 
-finalfit::missing_pattern()
-
-#Imputacja danych metodą hotdeck library(VIM) data_no_error \<-
-hotdeck(data)
-
-
-#Sprawdzenie czy imputacja usunęła brakujące wartości 
-data_no_error %\>%
-finalfit::missing_plot()
+```{r echo=FALSE}
+czyste_dane %>%
+  dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
+                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
+                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
+  finalfit::missing_plot()
 ```
-
-###3.3. Grupowanie danych i transformacja zmiennych
+Po zwizualizowaniu brakujących danych można zauważyć, że nie ma już pustych wartości w danych. Zostały one skutecznie zastąpione za pomoca zastosowanej metody.
+### Grupowanie danych i transformacja zmiennych
 
 Dane zostały podzielone na grupy w celu ułatwienia analizy i
 interpretacji wyników.
@@ -227,9 +313,9 @@ czyste_dane_temp2 <- czyste_dane_temp2 %>%
   mutate(grupa2 = factor(grupa2, levels = c("2.0", "3.0", "3.5", "4.0", "4.5", "5.0")))
 ```
 
-##4. Eksploracyjna Analiza Danych (EDA)
+## Eksploracyjna Analiza Danych (EDA)
 
-###4.1. Rozkład wyników egzaminacyjnych
+### Rozkład wyników egzaminacyjnych
 
 Analiza rozkładu wyników egzaminacyjnych pozwala ocenić, jak
 zróżnicowane są osiągnięcia uczniów oraz czy dane zawierają ewentualne
@@ -245,7 +331,7 @@ ggplot(czyste_dane, aes(x = Exam_Score)) +
   theme_minimal()
 ```
 
-###4.2. Analiza korelacji między zmiennymi
+### Analiza korelacji między zmiennymi
 
 W celu oceny, które zmienne są najsilniej powiązane z wynikami
 egzaminacyjnymi, oszcowano model regresji liniowej.
@@ -263,7 +349,7 @@ model <- lm(Exam_Score ~ Hours_Studied + Attendance + Parental_Involvement +
 summary(model)
 ```
 
-###4.3. Wpływ poszczególnych czynników na wyniki uczniów
+### Wpływ poszczególnych czynników na wyniki uczniów
 
 Przeanalizowano wpływ kluczowych czynników, takich jak liczba godzin
 nauki, frekwencja, dostęp do zasobów edukacyjnych oraz wsparcie rodziców
