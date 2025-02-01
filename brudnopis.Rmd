@@ -156,18 +156,9 @@ data %>%
   finalfit::missing_plot()
 ```
 
--   `missing_pattern()` pokazuje szczegółową strukturę braków.
-
-```{r echo=FALSE}
-data %>%
-  dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
-                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
-                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
-  finalfit::missing_pattern()
-```
-
--   `VIM::aggr()` pozwala sprawdzić, które zmienne mają najwięcej
-    braków.
+Po zwizualizowaniu brakujących wartości za pomocą wykresu
+`missing_plot()` można zauważyć, że w zbiorze danych występują braki w
+kilku zmiennych.
 
 ```{r echo=FALSE}
   # VIM method
@@ -179,39 +170,9 @@ data %>%
              prop    = FALSE) 
 ```
 
-### Analiza zależności między zmiennymi
-
-Analiza korelacji i zależności między zmiennymi pozwala określić, które
-czynniki mają największy wpływ na wyniki egzaminacyjne. Przeprowadzona
-analiza obejmuje obliczenie współczynników korelacji Spearmana dla
-kluczowych zmiennych oraz ich wpływu na wynik końcowy.
-
-```{r echo=FALSE, korelacja include=FALSE}
-# Obliczenie korelacji Spearmana dla wielu zmiennych 
-cor_vars <- c("Hours_Studied", "Attendance", "Tutoring_Sessions",
-"Parental_Involvement", "Access_to_Resources", "Motivation_Level",
-"Internet_Access", "Previous_Scores", "Family_Income",
-"Teacher_Quality", "Peer_Influence", "Physical_Activity")
-
-cor_results <- sapply(cor_vars, function(var) {
-cor.test(czyste_dane[[var]],
-czyste_dane$Exam_Score, method = "spearman")$estimate })
-```
-
-```{undefined echo=FALSE}
-# Wyniki korelacji 
-cor_results
-```
-
-```{r echo=FALSE}
-data <- as.data.frame(data)
-
-data %>%
-  dplyr::select(Hours_Studied, Attendance, Parental_Involvement, Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
-                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
-                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
-  finalfit::missing_plot()
-```
+Po przealizowaniu przedstawionych wykresów można dość do wnioksku, iż
+brakujące dane nie są w żaden sposób skorelowane z innymi zmiennymi.
+Można stwierdzić, że braki w danych są losowe.
 
 ### Czyszczenie danych i imputacja brakujących wartości
 
@@ -279,39 +240,110 @@ czyste_dane %>%
                 Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
   finalfit::missing_plot()
 ```
-Po zwizualizowaniu brakujących danych można zauważyć, że nie ma już pustych wartości w danych. Zostały one skutecznie zastąpione za pomoca zastosowanej metody.
+
+Po zwizualizowaniu danych można zauważyć, że nie ma już pustych wartości
+w danych. Zostały one skutecznie zastąpione za pomoca zastosowanej
+metody.
+
+### Analiza zależności między zmiennymi
+
+Analiza korelacji i zależności między zmiennymi pozwala określić, które
+czynniki mają największy wpływ na wyniki egzaminacyjne. Przeprowadzona
+analiza obejmuje obliczenie współczynników korelacji Spearmana dla
+kluczowych zmiennych oraz ich wpływu na wynik końcowy.
+
+```{r echo=FALSE, warning=FALSE}
+# Tworzenie kopii danych, aby nie nadpisywać oryginału
+dane_temp <- czyste_dane
+
+# Lista zmiennych numerycznych
+num_vars <- names(dane_temp)[sapply(dane_temp, is.numeric)]
+
+# Lista zmiennych kategorycznych (faktory i tekstowe)
+cat_vars <- names(dane_temp)[sapply(dane_temp, is.character) | sapply(dane_temp, is.factor)]
+
+# Konwersja zmiennych kategorycznych na liczby (bez zmiany oryginalnej tabeli)
+dane_temp[cat_vars] <- lapply(dane_temp[cat_vars], function(x) as.numeric(as.factor(x)))
+
+# Lista wszystkich zmiennych liczbowych (po konwersji)
+all_numeric_vars <- c(num_vars, cat_vars)
+
+# Obliczenie korelacji Spearmana względem Exam_Score
+cor_results <- sapply(setdiff(all_numeric_vars, "Exam_Score"), function(var) {
+  cor.test(dane_temp[[var]], dane_temp$Exam_Score, method = "spearman")$estimate
+})
+
+# Posortowanie wyników wg wartości bezwzględnej korelacji (od najsilniejszej)
+cor_results_sorted <- sort(abs(cor_results), decreasing = TRUE)
+
+# Wyświetlenie wyników
+print(cor_results_sorted)
+```
+
+Przeprowadzona analiza wykazała, że frekwencja *(Attendance)* oraz
+liczba godzin nauki *(Hours_Studied)* mają najsilniejszy pozytywny wpływ
+na wynik egzaminu. Istotna, choć słabsza korelacja występuje również dla
+wcześniejszych wyników *(Previous_Scores)* oraz liczby korepetycji
+*(Tutoring_Sessions)*.
+
+Zaskakująco, zaangażowanie rodziców *(Parental_Involvement)* oraz dostęp
+do zasobów edukacyjnych *(Access_to_Resources)* wykazują negatywną
+korelację, co może sugerować, że większa pomoc rodziców jest wynikiem
+trudności ucznia, a samo posiadanie zasobów nie przekłada się
+bezpośrednio na sukces.
+
+Wyniki wskazują, że samodzielna praca i regularna obecność na zajęciach
+są kluczowe dla osiągnięcia wysokich wyników egzaminacyjnych.
+
 ### Grupowanie danych i transformacja zmiennych
 
 Dane zostały podzielone na grupy w celu ułatwienia analizy i
 interpretacji wyników.
 
-``` r
-#Uszeregowanie danych w grupach
-czyste_dane_temp$grupa1 <- factor(czyste_dane_temp$grupa1, levels = c("poniżej 16", "16-23", "powyżej 23"))
-#wykres
-ggplot(czyste_dane_temp, aes(x = grupa1, y = Exam_Score, fill = grupa1)) +
-  geom_boxplot() +
-  theme_minimal() +
-  labs(title = "Wpływ godzin nauki na wynik egzaminu",
-       x = "Ilość godzin nauki",
-       y = "Wynik egzaminu") +
-  scale_fill_brewer(palette = "Set4")
+```{r include=FALSE}
+# Dodanie kolumn 'grupa1' (podział według godzin nauki)
+czyste_dane <- czyste_dane %>%
+  mutate(grupa1 = case_when(
+    Hours_Studied < 16 ~ "poniżej 16",
+    Hours_Studied >= 16 & Hours_Studied <= 23 ~ "16-23",
+    Hours_Studied > 23 ~ "powyżej 23"
+  )) %>%
+  mutate(grupa1 = factor(grupa1, levels = c("poniżej 16", "16-23", "powyżej 23")))
 
-# Podział kolumny Exam_Score na grupy
-czyste_dane_temp2 <- czyste_dane %>%
+# Dodanie kolumny 'grupa2' (podział Exam_Score według ocen)
+czyste_dane <- czyste_dane %>%
   mutate(grupa2 = case_when(
-    Exam_Score < 60 ~ "2.0",                          # poniżej 60
-    Exam_Score >= 60 & Exam_Score <= 65 ~ "3.0",      # 60 do 65
-    Exam_Score >= 66 & Exam_Score <= 70 ~ "3.5",      # 66 do 70
-    Exam_Score >= 71 & Exam_Score <= 80 ~ "4.0",      # 71 do 80
-    Exam_Score >= 81 & Exam_Score <= 90 ~ "4.5",      # 81 do 90
-    Exam_Score > 90 ~ "5.0",                          # powyżej 90
-    TRUE ~ "Brak danych"                              # "Brak danych", by uniknąć NA
-  ))
-#ustawianie pogrupowanych danych jako factor
-czyste_dane_temp2 <- czyste_dane_temp2 %>%
+    Exam_Score < 60 ~ "2.0",
+    Exam_Score >= 60 & Exam_Score <= 65 ~ "3.0",
+    Exam_Score >= 66 & Exam_Score <= 70 ~ "3.5",
+    Exam_Score >= 71 & Exam_Score <= 80 ~ "4.0",
+    Exam_Score >= 81 & Exam_Score <= 90 ~ "4.5",
+    Exam_Score >= 91 ~ "5.0",
+    TRUE ~ "Brak danych"
+  )) %>%
   mutate(grupa2 = factor(grupa2, levels = c("2.0", "3.0", "3.5", "4.0", "4.5", "5.0")))
+
+# Dodanie kolumny 'grupa3' (podział Previous_Scores według ocen)
+czyste_dane <- czyste_dane %>%
+  mutate(grupa3 = case_when(
+    Previous_Scores < 60 ~ "2.0",
+    Previous_Scores >= 60 & Previous_Scores <= 65 ~ "3.0",
+    Previous_Scores >= 66 & Previous_Scores <= 70 ~ "3.5",
+    Previous_Scores >= 71 & Previous_Scores <= 80 ~ "4.0",
+    Previous_Scores >= 81 & Previous_Scores <= 90 ~ "4.5",
+    Previous_Scores >= 91 ~ "5.0",
+    TRUE ~ "Brak danych"
+  )) %>%
+  mutate(grupa3 = factor(grupa3, levels = c("2.0", "3.0", "3.5", "4.0", "4.5", "5.0")))
 ```
+
+Dla celów analizy dane zostały podzielone na grupy zmianna pokazująca
+liczbę godzin nauki została podziolona na trzy grupy: poniżej 16, 16-23
+oraz powyżej 23. Wyniki egzaminów zostały podzielone na 6 grup według
+według progów akademickich, które dają zaliczenie egzaminu uczniom
+którzy uzyskają wynik powyżej 60%. Wyniki z poprzednich egzaminów
+również zostały podzielone na 6 grup tak samo jak w przypadku wyników z
+egzaminu końcowego.
 
 ## Eksploracyjna Analiza Danych (EDA)
 
@@ -321,7 +353,7 @@ Analiza rozkładu wyników egzaminacyjnych pozwala ocenić, jak
 zróżnicowane są osiągnięcia uczniów oraz czy dane zawierają ewentualne
 wartości odstające.
 
-``` r
+```{r echo=FALSE}
 # Histogram wyników egzaminacyjnych
 ggplot(czyste_dane, aes(x = Exam_Score)) +
   geom_histogram(bins = 20, fill = "blue", color = "black", alpha = 0.7) +
@@ -336,7 +368,9 @@ ggplot(czyste_dane, aes(x = Exam_Score)) +
 W celu oceny, które zmienne są najsilniej powiązane z wynikami
 egzaminacyjnymi, oszcowano model regresji liniowej.
 
-``` r
+```{r echo=FALSE}
+czyste_dane <- czyste_dane %>%
+  mutate_if(is.character, as.factor)
 # Regresja liniowa z wszystkimi czynnikami
 model <- lm(Exam_Score ~ Hours_Studied + Attendance + Parental_Involvement + 
               Access_to_Resources + Extracurricular_Activities + Sleep_Hours + 
@@ -349,13 +383,38 @@ model <- lm(Exam_Score ~ Hours_Studied + Attendance + Parental_Involvement +
 summary(model)
 ```
 
+Model regresji liniowej przeprowadzony na dostępnych danych wykazał
+istotne zależności między wieloma czynnikami a wynikami egzaminacyjnymi
+uczniów. Model osiągnął R² = 0.6228, co oznacza, że około 62,3%
+wariancji wyników egzaminacyjnych można wyjaśnić uwzględnionymi
+zmiennymi.
+
+Najistotniejsze czynniki wpływające na wynik egzaminu
+
+-   Liczba godzin nauki (Estimate = 0.266, p \< 0.001) – Im więcej
+    godzin nauki, tym wyższy wynik egzaminacyjny. Jest to jeden z
+    najsilniejszych predyktorów.
+-   Frekwencja na zajęciach (Estimate = 0.187, p \< 0.001) – Regularna
+    obecność w szkole istotnie koreluje z lepszymi wynikami.
+-   Poprzednie wyniki (Estimate = 0.048, p \< 0.001) – Wyższe wyniki z
+    wcześniejszych testów przewidują lepsze rezultaty końcowe.
+-   Dostęp do korepetycji (Estimate = 0.449, p \< 0.001) – Uczniowie
+    korzystający z dodatkowych lekcji osiągają lepsze wyniki.
+-   Pozytywny wpływ rówieśników (Estimate = 0.957, p \< 0.001) –
+    Uczniowie przebywający w motywującym środowisku osiągają lepsze
+    wyniki.
+-   Aktywność fizyczna (Estimate = 0.203, p \< 0.001) – Regularna
+    aktywność fizyczna wiąże się z nieco lepszymi wynikami.
+
 ### Wpływ poszczególnych czynników na wyniki uczniów
 
 Przeanalizowano wpływ kluczowych czynników, takich jak liczba godzin
 nauki, frekwencja, dostęp do zasobów edukacyjnych oraz wsparcie rodziców
 na wyniki egzaminacyjne.
 
-``` r
+**Analiza wpływu godzin nauki na wynik egzaminu**
+
+```{r echo=FALSE}
 # Boxplot: Wpływ godzin nauki na wynik egzaminu
 ggplot(czyste_dane, aes(x = grupa1, y = Exam_Score, fill = grupa1)) +
   geom_boxplot() +
@@ -365,7 +424,13 @@ ggplot(czyste_dane, aes(x = grupa1, y = Exam_Score, fill = grupa1)) +
   theme_minimal()
 ```
 
-``` r
+Po przeanalizowaniu powyższego wykresu można zauważyć, że uczniowie
+którzy spędzają więcej czasu na nauce osiągają lepsze wyniki
+egzaminacyjne.
+
+Wpływ frekwencji na wynik egzaminu
+
+```{r echo=FALSE}
 # Boxplot: Wpływ frekwencji na wynik egzaminu
 ggplot(czyste_dane, aes(x = grupa2, y = Attendance, fill = grupa2)) +
   geom_boxplot() +
@@ -375,7 +440,9 @@ ggplot(czyste_dane, aes(x = grupa2, y = Attendance, fill = grupa2)) +
   theme_minimal()
 ```
 
-``` r
+Wpływ zaangażowania rodziców na wynik egzaminu
+
+```{r echo=FALSE}
 # Boxplot: Wpływ zaangażowania rodziców na wynik egzaminu
 ggplot(czyste_dane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement)) +
   geom_boxplot() +
