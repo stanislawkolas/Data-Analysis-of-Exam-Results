@@ -1,0 +1,538 @@
+---
+title: Czynniki wpływające na wyniki egzaminu.
+author:
+- name: Jakub Kołpaczyński, 
+
+- name: SBartosz Kurzyński,
+
+- name: Stanisław Kolas
+ 
+abstract: |
+  Projket analiza danych
+keywords: submission, JEDM, abstract, instructions, style
+bibliography: ref.bib
+output: rticles::jedm_article
+---
+
+```{r setup, include = FALSE, echo = FALSE, purl = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+# Wczytanie danych
+data <- read.csv(file = "czynniki.csv")
+# Stworzenie ramki danych którymi się będziemy zajmować
+data <- data.frame(data)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Wczytywanie wymaganych pakietów
+required_packages <- c("dplyr", "ggplot2", "finalfit", "VIM", "validate", 
+        "errorlocate", "tidyverse", "ggcorrplot", "forcats",
+        "ggthemes","tidyverse","dlookr","editrules","hrbrthemes","plotly",
+        "ISLR","gapminder","kableExtra","ggstatsplot","gtsummary", "rticles", "readr","moments")
+
+# Sprawdzenie i instalacja brakujących pakietów
+install_if_missing <- function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+}
+
+sapply(required_packages, install_if_missing)
+
+# Załadowanie pakietów
+library(dplyr)
+library(ggplot2)
+library(finalfit)
+library(VIM)
+library(validate)
+library(errorlocate)
+library(tidyverse)
+library(ggcorrplot)
+library(forcats)
+library(ggthemes)
+library(dlookr)
+library(editrules)
+library(hrbrthemes)
+library(plotly)
+library(ISLR)
+library(gapminder)
+library(kableExtra)
+library(ggstatsplot)
+library(gtsummary)
+library(readr)
+library(moments)
+library(rticles)
+```
+
+# Analiza czynników wpływających na wyniki z egzaminów studentów
+
+## Wstęp
+
+### Cel projektu
+
+Celem projektu jest analiza czynników wpływających na wyniki uczniów w egzaminach. Badanie ma na celu zidentyfikowanie, które zmienne, takie jak liczba godzin nauki, frekwencja czy wsparcie rodziny, mają największy wpływ na sukces akademicki. Wyniki analizy mogą pomóc w optymalizacji strategii edukacyjnych oraz wdrożeniu skutecznych metod wsparcia dla uczniów o niższych wynikach.
+
+### Opis problemu
+
+Osiągnięcia akademickie uczniów są determinowane przez wiele czynników – zarówno indywidualnych, jak i środowiskowych. Trudności w nauce, poziom zaangażowania rodziców, dostęp do zasobów edukacyjnych czy aktywności pozalekcyjne mogą znacząco wpływać na ostateczne wyniki. Analiza tych czynników pozwoli na lepsze zrozumienie zależności i wsparcie uczniów w poprawie wyników.
+
+### Znaczenie analizy wyników uczniów
+
+Zrozumienie czynników wpływających na wyniki egzaminacyjne jest istotne z kilku powodów:
+
+Optymalizacja strategii nauczania – analiza wyników może pomóc nauczycielom i decydentom edukacyjnym w dostosowaniu metod nauczania do potrzeb uczniów.
+
+Wsparcie dla uczniów w trudnej sytuacji – identyfikacja kluczowych czynników umożliwia wdrożenie skutecznych programów pomocy.
+
+Poprawa efektywności edukacji – lepsze zrozumienie procesów nauczania pozwala na skuteczniejsze zarządzanie systemem edukacyjnym.
+
+## Opis danych
+
+### Źródło danych
+
+Dane wykorzystane w analizie pochodzą z anonimowego zbioru danych dotyczącego uczniów szkół średnich. Zawierają one informacje na temat wyników egzaminacyjnych oraz czynników potencjalnie wpływających na sukces akademicki.
+
+### Struktura zbioru danych
+
+Zbiór danych zawiera następujące kolumny:
+
+Zmienne numeryczne: Liczba godzin nauki, frekwencja, liczba sesji korepetycji, wynik egzaminu itp.
+
+Zmienne kategoryczne: Poziom zaangażowania rodziców, dostęp do zasobów edukacyjnych, typ szkoły, aktywności pozalekcyjne itp.
+
+### Opis zmiennych
+
+Każda z analizowanych zmiennych pełni określoną funkcję w kontekście analizy wyników uczniów. Główne zmienne to:
+
+-   Hours Studied – liczba godzin nauki tygodniowo.
+
+-   Attendance – procentowa frekwencja na zajęciach.
+
+-   Tutoring Sessions – liczba godzin spędzonych na korepetycjach.
+
+-   Parental Involvement – poziom zaangażowania rodziców (Low, Medium, High).
+
+-   Access to Resources – dostęp do zasobów edukacyjnych (Low, Medium, High).
+
+-   Motivation Level – poziom motywacji ucznia.
+
+-   Previous Scores – wyniki ucznia z poprzednich egzaminów.
+
+-   Exam Score – wynik końcowy z egzaminu.
+
+Dane te zostaną poddane dalszej analizie w celu określenia ich wpływu na końcowe wyniki uczniów.
+
+## Przygotowanie danych
+
+### Wizualizacja brakujących danych
+
+Aby lepiej zrozumieć rozkład brakujących danych w naszym zbiorze, wykonujemy kilka analiz:
+
+-   Wykres `missing_plot()` przedstawia ogólny wzór brakujących wartości dla kluczowych zmiennych.
+
+```{r echo=FALSE}
+data <- as.data.frame(data)
+
+data %>%
+  dplyr::select(Hours_Studied, Attendance, Parental_Involvement, Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
+                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
+                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
+  finalfit::missing_plot()
+```
+
+Po zwizualizowaniu brakujących wartości za pomocą wykresu `missing_plot()` można zauważyć, że w zbiorze danych występują braki w kilku zmiennych.
+
+```{r echo=FALSE}
+  # VIM method
+data %>%
+  dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
+                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
+                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
+  VIM::aggr(numbers = TRUE,
+             prop    = FALSE) 
+```
+
+Po przealizowaniu przedstawionych wykresów można dość do wnioksku, iż brakujące dane nie są w żaden sposób skorelowane z innymi zmiennymi. Można stwierdzić, że braki w danych są losowe.
+
+### Czyszczenie danych i imputacja brakujących wartości
+
+Pierwszą rzeczą jest ustalenie reguł dla wszystkich danych istniejących oraz imputowanych. Pozwala to na usunięcie wartości skrajnie odstających, które mogły być błędem przy wprowadzaniu danych.
+
+```{r include=FALSE}
+RULE <- validator(Hours_Studied >= 0, 
+                    Hours_Studied <= 30,
+                  Attendance >= 0,
+                    Attendance <= 100,
+                  Parental_Involvement %in% c("Low","Medium","High"),
+                  Access_to_Resources %in% c("Low", "Medium", "High"),
+                  Extracurricular_Activities %in% c("No","Yes"),
+                  Sleep_Hours >= 0, 
+                  Previous_Scores >= 0, 
+                    Previous_Scores<= 100, 
+                  Motivation_Level %in% c("Low","Medium","High"),
+                  Internet_Access %in% c("No","Yes"),
+                  Tutoring_Sessions >= 0,
+                  Family_Income %in% c("Low","Medium","High"),
+                  Teacher_Quality %in% c("Low","Medium","High"),
+                  School_Type %in% c("Public","Private"),
+                  Peer_Influence %in% c("Negative","Neutral","Positive"),
+                  Physical_Activity >= 0,
+                    Physical_Activity <= 25,
+                  Learning_Disabilities %in% c("No","Yes"),
+                  Parental_Education_Level %in% c("High School","College","Postgraduate"),
+                  Distance_from_Home %in% c("Near","Moderate","Far"),
+                  Gender %in% c("Male","Female"),
+                  Exam_Score >= 0,
+                  Exam_Score <= 100)
+
+#sprawdzenie ilości danych które nie odpowidaja powyższym regułom ustalonym mna podstawie eksperckiej analizy
+out   <- confront(data, RULE)
+
+#zamiana danych typu character na factor
+data <- data %>%
+  mutate_if(is.character, as.factor)
+
+#zastąpienie błędów na NA
+data_no_error <- replace_errors(data,RULE)
+
+#imputacja danych przez hotdeck
+czyste_dane <- hotdeck(data_no_error)
+```
+
+Po zastosowaniu zasad w jakich dane mają być skondensowane mogły wystąpić wartości puste (NA). Wartości te powstały w miejscach wartości, które nie spełniały powyższych zasad.
+
+Po uprzednim przygotowaniu danych oraz ich zidentyfikowaniu należy przejść do imputacji danych. Do imputacji wybrano metodę hotdeck, która polega na zastępowaniu brakujących wartości rzeczywistych danymi z tego samego zbioru.
+
+Przed przystąpieniem do analizy konieczne było usunięcie brakujących wartości oraz poprawienie błędów w danych.
+
+```{r echo=FALSE}
+czyste_dane %>%
+  dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
+                Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
+                Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender) %>%
+  finalfit::missing_plot()
+```
+
+Po zwizualizowaniu danych można zauważyć, że nie ma już pustych wartości w danych. Zostały one skutecznie zastąpione za pomoca zastosowanej metody.
+
+### Analiza zależności między zmiennymi
+
+Analiza korelacji i zależności między zmiennymi pozwala określić, które czynniki mają największy wpływ na wyniki egzaminacyjne. Przeprowadzona analiza obejmuje obliczenie współczynników korelacji Spearmana dla kluczowych zmiennych oraz ich wpływu na wynik końcowy.
+
+```{r echo=FALSE, warning=FALSE}
+# Tworzenie kopii danych, aby nie nadpisywać oryginału
+dane_temp <- czyste_dane
+
+# Lista zmiennych numerycznych
+num_vars <- names(dane_temp)[sapply(dane_temp, is.numeric)]
+
+# Lista zmiennych kategorycznych (faktory i tekstowe)
+cat_vars <- names(dane_temp)[sapply(dane_temp, is.character) | sapply(dane_temp, is.factor)]
+
+# Konwersja zmiennych kategorycznych na liczby (bez zmiany oryginalnej tabeli)
+dane_temp[cat_vars] <- lapply(dane_temp[cat_vars], function(x) as.numeric(as.factor(x)))
+
+# Lista wszystkich zmiennych liczbowych (po konwersji)
+all_numeric_vars <- c(num_vars, cat_vars)
+
+# Obliczenie korelacji Spearmana względem Exam_Score
+cor_results <- sapply(setdiff(all_numeric_vars, "Exam_Score"), function(var) {
+  cor.test(dane_temp[[var]], dane_temp$Exam_Score, method = "spearman")$estimate
+})
+
+# Posortowanie wyników wg wartości bezwzględnej korelacji (od najsilniejszej)
+cor_results_sorted <- sort(abs(cor_results), decreasing = TRUE)
+
+# Wyświetlenie wyników
+print(cor_results_sorted)
+```
+
+Przeprowadzona analiza wykazała, że frekwencja *(Attendance)* oraz liczba godzin nauki *(Hours_Studied)* mają najsilniejszy pozytywny wpływ na wynik egzaminu. Istotna, choć słabsza korelacja występuje również dla wcześniejszych wyników *(Previous_Scores)* oraz liczby korepetycji *(Tutoring_Sessions)*.
+
+Zaskakująco, zaangażowanie rodziców *(Parental_Involvement)* oraz dostęp do zasobów edukacyjnych *(Access_to_Resources)* wykazują negatywną korelację, co może sugerować, że większa pomoc rodziców jest wynikiem trudności ucznia, a samo posiadanie zasobów nie przekłada się bezpośrednio na sukces.
+
+Wyniki wskazują, że samodzielna praca i regularna obecność na zajęciach są kluczowe dla osiągnięcia wysokich wyników egzaminacyjnych.
+
+### Grupowanie danych i transformacja zmiennych
+
+Dane zostały podzielone na grupy w celu ułatwienia analizy i interpretacji wyników.
+
+```{r include=FALSE}
+# Dodanie kolumn 'grupa1' (podział według godzin nauki)
+czyste_dane <- czyste_dane %>%
+  mutate(grupa1 = case_when(
+    Hours_Studied < 16 ~ "poniżej 16",
+    Hours_Studied >= 16 & Hours_Studied <= 23 ~ "16-23",
+    Hours_Studied > 23 ~ "powyżej 23"
+  )) %>%
+  mutate(grupa1 = factor(grupa1, levels = c("poniżej 16", "16-23", "powyżej 23")))
+
+# Dodanie kolumny 'grupa2' (podział Exam_Score według ocen)
+czyste_dane <- czyste_dane %>%
+  mutate(grupa2 = case_when(
+    Exam_Score < 60 ~ "2.0",
+    Exam_Score >= 60 & Exam_Score <= 65 ~ "3.0",
+    Exam_Score >= 66 & Exam_Score <= 70 ~ "3.5",
+    Exam_Score >= 71 & Exam_Score <= 80 ~ "4.0",
+    Exam_Score >= 81 & Exam_Score <= 90 ~ "4.5",
+    Exam_Score >= 91 ~ "5.0",
+    TRUE ~ "Brak danych"
+  )) %>%
+  mutate(grupa2 = factor(grupa2, levels = c("2.0", "3.0", "3.5", "4.0", "4.5", "5.0")))
+
+# Dodanie kolumny 'grupa3' (podział Previous_Scores według ocen)
+czyste_dane <- czyste_dane %>%
+  mutate(grupa3 = case_when(
+    Previous_Scores < 60 ~ "2.0",
+    Previous_Scores >= 60 & Previous_Scores <= 65 ~ "3.0",
+    Previous_Scores >= 66 & Previous_Scores <= 70 ~ "3.5",
+    Previous_Scores >= 71 & Previous_Scores <= 80 ~ "4.0",
+    Previous_Scores >= 81 & Previous_Scores <= 90 ~ "4.5",
+    Previous_Scores >= 91 ~ "5.0",
+    TRUE ~ "Brak danych"
+  )) %>%
+  mutate(grupa3 = factor(grupa3, levels = c("2.0", "3.0", "3.5", "4.0", "4.5", "5.0")))
+```
+
+Dla celów analizy dane zostały podzielone na grupy zmianna pokazująca liczbę godzin nauki została podziolona na trzy grupy: poniżej 16, 16-23 oraz powyżej 23. Wyniki egzaminów zostały podzielone na 6 grup według według progów akademickich, które dają zaliczenie egzaminu uczniom którzy uzyskają wynik powyżej 60%. Wyniki z poprzednich egzaminów również zostały podzielone na 6 grup tak samo jak w przypadku wyników z egzaminu końcowego.
+
+## Eksploracyjna Analiza Danych (EDA)
+
+### Rozkład wyników egzaminacyjnych
+
+Analiza rozkładu wyników egzaminacyjnych pozwala ocenić, jak zróżnicowane są osiągnięcia uczniów oraz czy dane zawierają ewentualne wartości odstające.
+
+```{r echo=FALSE}
+# Histogram wyników egzaminacyjnych
+ggplot(czyste_dane, aes(x = Exam_Score)) +
+  geom_histogram(bins = 20, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Rozkład wyników egzaminacyjnych",
+       x = "Wynik egzaminu",
+       y = "Liczba uczniów") +
+  theme_minimal()
+```
+
+```{r echo=FALSE}
+#Statystyki opisowe
+exam_score_stats <- summary(czyste_dane$Exam_Score)
+std_dev <- sd(czyste_dane$Exam_Score)  # Odchylenie standardowe
+skewness <- moments::skewness(czyste_dane$Exam_Score)  # Skośność
+kurtosis <- moments::kurtosis(czyste_dane$Exam_Score)  # Kurtoza
+
+# Wyświetlenie statystyk
+cat("Statystyki opisowe dla 'Exam_Score':\n")
+print(exam_score_stats)
+cat("\nOdchylenie standardowe:", std_dev)
+cat("\nSkośność:", skewness)
+cat("\nKurtoza:", kurtosis)
+```
+
+-   Wyniki są skoncentrowane wokół średniej (67.23), z relatywnie małym rozrzutem (odchylenie standardowe 3.83).
+
+-   Wysoka skośność i kurtoza wskazują na asymetryczność rozkładu i możliwe wartości odstające w wyższych wynikach (np. wyniki 90+).
+
+-   Wyniki poniżej 60 oraz powyżej 90 mogą wymagać bliższego zbadania, aby określić, czy są to uczniowie ze szczególnymi trudnościami lub osiągający wyjątkowe wyniki.
+
+### Analiza korelacji między zmiennymi
+
+W celu oceny, które zmienne są najsilniej powiązane z wynikami egzaminacyjnymi, oszcowano model regresji liniowej.
+
+```{r include=FALSE}
+# Regresja liniowa z wszystkimi czynnikami
+model <- lm(Exam_Score ~ Hours_Studied + Attendance + Parental_Involvement + 
+              Access_to_Resources + Extracurricular_Activities + Sleep_Hours + 
+              Previous_Scores + Motivation_Level + Internet_Access + Tutoring_Sessions + 
+              Family_Income + Teacher_Quality + School_Type + Peer_Influence + 
+              Physical_Activity + Learning_Disabilities + Parental_Education_Level + 
+              Distance_from_Home + Gender, 
+            data=czyste_dane)
+            
+summary(model)
+```
+
+```{r echo=FALSE}
+summary_model <- summary(model)
+
+# Wyciągnięcie współczynników z modelu
+coefficients <- summary_model$coefficients
+
+# Sortowanie zmiennych według ich wpływu (absolutna wartość statystyki t)
+sorted_coefficients <- coefficients[order(abs(coefficients[, "t value"]), decreasing = TRUE), ]
+
+# Wyświetlenie 10 najważniejszych zmiennych
+head(sorted_coefficients, 10)
+```
+
+Model regresji liniowej przeprowadzony na dostępnych danych wykazał istotne zależności między wieloma czynnikami a wynikami egzaminacyjnymi uczniów. Model osiągnął R² = 0.6228, co oznacza, że około 62,3% wariancji wyników egzaminacyjnych można wyjaśnić uwzględnionymi zmiennymi.
+
+Najistotniejsze czynniki wpływające na wynik egzaminu
+
+#### Kluczowe wnioski:
+
+1.  **Największy pozytywny wpływ na wyniki egzaminu mają:**
+
+    -   Frekwencja (`Attendance`).
+
+    -   Liczba godzin nauki (`Hours_Studied`).
+
+    -   Sesje korepetycji (`Tutoring_Sessions`).
+
+2.  **Negatywny wpływ na wyniki egzaminu mają:**
+
+    -   Brak dostępu do zasobów edukacyjnych (`Access_to_Resources`).
+
+    -   Niskie zaangażowanie rodziców (`Parental_Involvement`).
+
+    -   Niski poziom dochodów rodzinnych (`Family_Income`).
+
+3.  **Istotność zmiennych:** Wszystkie wymienione zmienne mają bardzo niski poziom wartości p (`p-value < 0.001`), co świadczy o ich wysokiej istotności statystycznej.
+
+### Wpływ poszczególnych czynników na wyniki uczniów
+
+Przeanalizowano wpływ kluczowych czynników, takich jak liczba godzin nauki, frekwencja, dostęp do zasobów edukacyjnych oraz wsparcie rodziców na wyniki egzaminacyjne.
+
+```{r include=FALSE}
+czyste_dane$Access_to_Resources <- factor(czyste_dane$Access_to_Resources, levels = c("Low", "Medium", "High"))
+czyste_dane$Parental_Involvement <- factor(czyste_dane$Parental_Involvement, levels = c("Low", "Medium", "High"))
+czyste_dane$Family_Income <- factor(czyste_dane$Family_Income, levels = c("Low", "Medium", "High"))
+```
+
+**Analiza wpływu godzin nauki na wynik egzaminu**
+
+```{r echo=FALSE}
+# Boxplot: Wpływ godzin nauki na wynik egzaminu
+ggplot(czyste_dane, aes(x = grupa1, y = Exam_Score, fill = grupa1)) +
+  geom_boxplot() +
+  labs(title = "Wpływ liczby godzin nauki na wynik egzaminu",
+       x = "Liczba godzin nauki",
+       y = "Wynik egzaminu") +
+  theme_minimal()
+```
+
+```{r}
+#Liczba godzin nauki (Hours_Studied)
+ggplot(czyste_dane, aes(x = Hours_Studied, y = Exam_Score)) +
+  geom_point(alpha = 0.6, color = "orange") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    title = "Wpływ godzin nauki na wynik egzaminu",
+    x = "Godziny nauki",
+    y = "Wynik egzaminu"
+  ) +
+  theme_minimal()
+```
+
+Po przeanalizowaniu powyższego wykresu można zauważyć, że uczniowie którzy spędzają więcej czasu na nauce osiągają lepsze wyniki egzaminacyjne.
+
+Wpływ frekwencji na wynik egzaminu
+
+```{r echo=FALSE}
+# Boxplot: Wpływ frekwencji na wynik egzaminu
+ggplot(czyste_dane, aes(x = grupa2, y = Attendance, fill = grupa2)) +
+  geom_boxplot() +
+  labs(title = "Zależność wyniku egzaminu od frekwencji",
+       x = "Ocena końcowa",
+       y = "Frekwencja (%)") +
+  theme_minimal()
+```
+
+```{r}
+#Frekwencja (Attendance)
+ggplot(czyste_dane, aes(x = Attendance, y = Exam_Score)) +
+  geom_point(alpha = 0.6, color = "orange") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    title = "Wpływ frekwencji na wynik egzaminu",
+    x = "Frekwencja (%)",
+    y = "Wynik egzaminu"
+  ) +
+  theme_minimal()
+```
+
+Wpływ dostępu do zasobów edukacyjnych
+
+```{r}
+#Dostęp do zasobów edukacyjnych (Access_to_Resources)
+ggplot(czyste_dane, aes(x = Access_to_Resources, y = Exam_Score, fill = Access_to_Resources)) +
+  geom_boxplot(color = "black", alpha = 0.7) +
+  scale_fill_manual(values = c("Low" = "red", "Medium" = "orange", "High" = "green")) +
+  labs(
+    title = "Wpływ dostępu do zasobów edukacyjnych na wynik egzaminu",
+    x = "Dostęp do zasobów",
+    y = "Wynik egzaminu"
+  ) +
+  theme_minimal()
+```
+
+Uczniowie z niskim dostępem do zasobów mają znacznie niższe wyniki egzaminów w porównaniu do tych z wysokim dostępem. To jedna z kluczowych zmiennych negatywnych.
+
+Wpływ zaangażowania rodziców
+
+```{r echo=FALSE}
+# Boxplot: Wpływ zaangażowania rodziców na wynik egzaminu
+ggplot(czyste_dane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement)) +
+  geom_boxplot() +
+  labs(title = "Wpływ zaangażowania rodziców na wyniki uczniów",
+       x = "Zaangażowanie rodziców",
+       y = "Wynik egzaminu") +
+  theme_minimal()
+```
+
+Podobny wzorzec jak w przypadku zasobów — niskie zaangażowanie rodziców wiąże się z niższymi wynikami.
+
+Wpływ dochodu rodziny na wynik egzaminu
+
+```{r}
+#Dochód rodziny (Family_Income)
+ggplot(czyste_dane, aes(x = Family_Income, y = Exam_Score, fill = Family_Income)) +
+  geom_boxplot(color = "black", alpha = 0.7) +
+  scale_fill_manual(values = c("Low" = "red", "Medium" = "orange", "High" = "green")) +
+  labs(
+    title = "Wpływ dochodu rodziny na wynik egzaminu",
+    x = "Dochód rodziny",
+    y = "Wynik egzaminu"
+  ) +
+  theme_minimal()
+```
+
+Uczniowie z rodzin o niskim dochodzie osiągają niższe wyniki egzaminacyjne w porównaniu do tych z rodzin o wyższym dochodzie.
+
+Wpływ korepetycji
+
+```{r message=FALSE, warning=FALSE}
+#Sesje korepetycji (Tutoring_Sessions)
+ggplot(czyste_dane, aes(x = Tutoring_Sessions, y = Exam_Score)) +
+  geom_point(alpha = 0.6, color = "orange") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(
+    title = "Wpływ sesji korepetycji na wynik egzaminu",
+    x = "Sesje korepetycji",
+    y = "Wynik egzaminu"
+  ) +
+  theme_minimal()
+```
+
+Większa liczba sesji korepetycji wpływa pozytywnie na wyniki egzaminacyjne, choć efekt jest nieco słabszy.
+
+### Podsumowanie projektu
+
+Przeprowadzona analiza wyników egzaminacyjnych dostarczyła cennych informacji na temat czynników wpływających na sukces edukacyjny uczniów. Skoncentrowano się na sześciu kluczowych zmiennych, które w sposób istotny wpływają na wyniki: frekwencji, liczbie godzin nauki, liczbie sesji korepetycji, dostępie do zasobów edukacyjnych, zaangażowaniu rodziców oraz dochodzie rodziny.
+
+Najważniejszymi czynnikami pozytywnie wpływającymi na wyniki egzaminów okazały się frekwencja i liczba godzin nauki. Regularne uczęszczanie na zajęcia oraz poświęcanie czasu na naukę stanowiły fundamenty wysokich osiągnięć. Również sesje korepetycji w znacznym stopniu wspierały wyniki uczniów, co sugeruje, że dodatkowe wsparcie edukacyjne może odgrywać kluczową rolę w wyrównywaniu braków w wiedzy.
+
+Zidentyfikowano również istotne bariery w edukacji. Ograniczony dostęp do zasobów edukacyjnych, niski dochód rodziny oraz niskie zaangażowanie rodziców wiązały się z gorszymi wynikami egzaminacyjnymi. Czynniki te są szczególnie ważne w kontekście planowania polityk edukacyjnych i programów wsparcia.
+
+### Znaczenie analizy wyników egzaminacyjnych
+
+Zrozumienie czynników wpływających na wyniki egzaminacyjne jest kluczowe z kilku powodów:
+
+1.  **Optymalizacja strategii nauczania** Wyniki analizy mogą być wykorzystane przez nauczycieli i decydentów edukacyjnych do dostosowania metod nauczania do indywidualnych potrzeb uczniów. Na przykład wsparcie uczniów z ograniczonym dostępem do zasobów edukacyjnych może obejmować udostępnienie technologii i materiałów dydaktycznych.
+
+2.  **Wsparcie dla uczniów w trudnej sytuacji** Identyfikacja kluczowych czynników, takich jak niski dochód rodziny czy brak zaangażowania rodziców, pozwala na wdrożenie programów wsparcia skierowanych do najbardziej potrzebujących uczniów. Działania takie mogą obejmować dodatkowe korepetycje, stypendia edukacyjne czy szkolenia dla rodziców.
+
+3.  **Poprawa efektywności edukacji** Lepsze zrozumienie procesów nauczania i czynników wpływających na wyniki pozwala na skuteczniejsze zarządzanie systemem edukacyjnym. Analiza wyników może służyć jako podstawa do projektowania polityk edukacyjnych, które koncentrują się na najważniejszych obszarach wymagających poprawy.
+
+Rekomendujemy dalsze inwestycje w programy wspierające uczniów z trudnymi warunkami socjoekonomicznymi oraz promowanie aktywnego zaangażowania rodziców w proces edukacji. Wyniki naszej analizy podkreślają potrzebę holistycznego podejścia do edukacji, które uwzględnia różnorodne czynniki wpływające na sukces uczniów. Tylko poprzez odpowiednie wsparcie możemy zapewnić równe szanse wszystkim uczniom i poprawić jakość edukacji jako całości.
