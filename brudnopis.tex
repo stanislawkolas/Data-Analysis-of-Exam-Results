@@ -1,0 +1,425 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={brudnopis},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{brudnopis}
+\author{}
+\date{\vspace{-2.5em}2025-01-31}
+
+\begin{document}
+\maketitle
+
+\section{Analiza czynników wpływających na wyniki z egzaminów
+studentów}\label{analiza-czynnikuxf3w-wpux142ywajux105cych-na-wyniki-z-egzaminuxf3w-studentuxf3w}
+
+\subsection{Wstęp}\label{wstux119p}
+
+\subsubsection{Cel projektu}\label{cel-projektu}
+
+Celem projektu jest analiza czynników wpływających na wyniki uczniów w
+egzaminach. Badanie ma na celu zidentyfikowanie, które zmienne, takie
+jak liczba godzin nauki, frekwencja czy wsparcie rodziny, mają
+największy wpływ na sukces akademicki. Wyniki analizy mogą pomóc w
+optymalizacji strategii edukacyjnych oraz wdrożeniu skutecznych metod
+wsparcia dla uczniów o niższych wynikach.
+
+\subsubsection{Opis problemu}\label{opis-problemu}
+
+Osiągnięcia akademickie uczniów są determinowane przez wiele czynników
+-- zarówno indywidualnych, jak i środowiskowych. Trudności w nauce,
+poziom zaangażowania rodziców, dostęp do zasobów edukacyjnych czy
+aktywności pozalekcyjne mogą znacząco wpływać na ostateczne wyniki.
+Analiza tych czynników pozwoli na lepsze zrozumienie zależności i
+wsparcie uczniów w poprawie wyników.
+
+\subsubsection{Znaczenie analizy wyników
+uczniów}\label{znaczenie-analizy-wynikuxf3w-uczniuxf3w}
+
+Zrozumienie czynników wpływających na wyniki egzaminacyjne jest istotne
+z kilku powodów:
+
+Optymalizacja strategii nauczania -- analiza wyników może pomóc
+nauczycielom i decydentom edukacyjnym w dostosowaniu metod nauczania do
+potrzeb uczniów.
+
+Wsparcie dla uczniów w trudnej sytuacji -- identyfikacja kluczowych
+czynników umożliwia wdrożenie skutecznych programów pomocy.
+
+Poprawa efektywności edukacji -- lepsze zrozumienie procesów nauczania
+pozwala na skuteczniejsze zarządzanie systemem edukacyjnym.
+
+\subsection{Opis danych}\label{opis-danych}
+
+\subsubsection{Źródło danych}\label{ux17aruxf3dux142o-danych}
+
+Dane wykorzystane w analizie pochodzą z anonimowego zbioru danych
+dotyczącego uczniów szkół średnich. Zawierają one informacje na temat
+wyników egzaminacyjnych oraz czynników potencjalnie wpływających na
+sukces akademicki.
+
+\subsubsection{Struktura zbioru danych}\label{struktura-zbioru-danych}
+
+Zbiór danych zawiera następujące kolumny:
+
+Zmienne numeryczne: Liczba godzin nauki, frekwencja, liczba sesji
+korepetycji, wynik egzaminu itp.
+
+Zmienne kategoryczne: Poziom zaangażowania rodziców, dostęp do zasobów
+edukacyjnych, typ szkoły, aktywności pozalekcyjne itp.
+
+\subsubsection{Opis zmiennych}\label{opis-zmiennych}
+
+Każda z analizowanych zmiennych pełni określoną funkcję w kontekście
+analizy wyników uczniów. Główne zmienne to:
+
+\begin{itemize}
+\item
+  Hours Studied -- liczba godzin nauki tygodniowo.
+\item
+  Attendance -- procentowa frekwencja na zajęciach.
+\item
+  Tutoring Sessions -- liczba godzin spędzonych na korepetycjach.
+\item
+  Parental Involvement -- poziom zaangażowania rodziców (Low, Medium,
+  High).
+\item
+  Access to Resources -- dostęp do zasobów edukacyjnych (Low, Medium,
+  High).
+\item
+  Motivation Level -- poziom motywacji ucznia.
+\item
+  Previous Scores -- wyniki ucznia z poprzednich egzaminów.
+\item
+  Exam Score -- wynik końcowy z egzaminu.
+\end{itemize}
+
+Dane te zostaną poddane dalszej analizie w celu określenia ich wpływu na
+końcowe wyniki uczniów.
+
+\subsection{Przygotowanie danych}\label{przygotowanie-danych}
+
+\subsubsection{Wizualizacja brakujących
+danych}\label{wizualizacja-brakujux105cych-danych}
+
+Aby lepiej zrozumieć rozkład brakujących danych w naszym zbiorze,
+wykonujemy kilka analiz:
+
+\begin{itemize}
+\tightlist
+\item
+  Wykres \texttt{missing\_plot()} przedstawia ogólny wzór brakujących
+  wartości dla kluczowych zmiennych.
+\end{itemize}
+
+Po zwizualizowaniu brakujących wartości za pomocą wykresu
+\texttt{missing\_plot()} można zauważyć, że w zbiorze danych występują
+braki w kilku zmiennych.
+
+Po przealizowaniu przedstawionych wykresów można dość do wnioksku, iż
+brakujące dane nie są w żaden sposób skorelowane z innymi zmiennymi.
+Można stwierdzić, że braki w danych są losowe.
+
+\subsubsection{Czyszczenie danych i imputacja brakujących
+wartości}\label{czyszczenie-danych-i-imputacja-brakujux105cych-wartoux15bci}
+
+Pierwszą rzeczą jest ustalenie reguł dla wszystkich danych istniejących
+oraz imputowanych. Pozwala to na usunięcie wartości skrajnie
+odstających, które mogły być błędem przy wprowadzaniu danych.
+
+Po zastosowaniu zasad w jakich dane mają być skondensowane mogły
+wystąpić wartości puste (NA). Wartości te powstały w miejscach wartości,
+które nie spełniały powyższych zasad.
+
+Po uprzednim przygotowaniu danych oraz ich zidentyfikowaniu należy
+przejść do imputacji danych. Do imputacji wybrano metodę hotdeck, która
+polega na zastępowaniu brakujących wartości rzeczywistych danymi z tego
+samego zbioru.
+
+Przed przystąpieniem do analizy konieczne było usunięcie brakujących
+wartości oraz poprawienie błędów w danych.
+
+Po zwizualizowaniu danych można zauważyć, że nie ma już pustych wartości
+w danych. Zostały one skutecznie zastąpione za pomoca zastosowanej
+metody.
+
+\subsubsection{Analiza zależności między
+zmiennymi}\label{analiza-zaleux17cnoux15bci-miux119dzy-zmiennymi}
+
+Analiza korelacji i zależności między zmiennymi pozwala określić, które
+czynniki mają największy wpływ na wyniki egzaminacyjne. Przeprowadzona
+analiza obejmuje obliczenie współczynników korelacji Spearmana dla
+kluczowych zmiennych oraz ich wpływu na wynik końcowy.
+
+Przeprowadzona analiza wykazała, że frekwencja \emph{(Attendance)} oraz
+liczba godzin nauki \emph{(Hours\_Studied)} mają najsilniejszy pozytywny
+wpływ na wynik egzaminu. Istotna, choć słabsza korelacja występuje
+również dla wcześniejszych wyników \emph{(Previous\_Scores)} oraz liczby
+korepetycji \emph{(Tutoring\_Sessions)}.
+
+Zaskakująco, zaangażowanie rodziców \emph{(Parental\_Involvement)} oraz
+dostęp do zasobów edukacyjnych \emph{(Access\_to\_Resources)} wykazują
+negatywną korelację, co może sugerować, że większa pomoc rodziców jest
+wynikiem trudności ucznia, a samo posiadanie zasobów nie przekłada się
+bezpośrednio na sukces.
+
+Wyniki wskazują, że samodzielna praca i regularna obecność na zajęciach
+są kluczowe dla osiągnięcia wysokich wyników egzaminacyjnych.
+
+\subsubsection{Grupowanie danych i transformacja
+zmiennych}\label{grupowanie-danych-i-transformacja-zmiennych}
+
+Dane zostały podzielone na grupy w celu ułatwienia analizy i
+interpretacji wyników.
+
+Dla celów analizy dane zostały podzielone na grupy zmianna pokazująca
+liczbę godzin nauki została podziolona na trzy grupy: poniżej 16, 16-23
+oraz powyżej 23. Wyniki egzaminów zostały podzielone na 6 grup według
+według progów akademickich, które dają zaliczenie egzaminu uczniom
+którzy uzyskają wynik powyżej 60\%. Wyniki z poprzednich egzaminów
+również zostały podzielone na 6 grup tak samo jak w przypadku wyników z
+egzaminu końcowego.
+
+\subsection{Eksploracyjna Analiza Danych
+(EDA)}\label{eksploracyjna-analiza-danych-eda}
+
+\subsubsection{Rozkład wyników
+egzaminacyjnych}\label{rozkux142ad-wynikuxf3w-egzaminacyjnych}
+
+Analiza rozkładu wyników egzaminacyjnych pozwala ocenić, jak
+zróżnicowane są osiągnięcia uczniów oraz czy dane zawierają ewentualne
+wartości odstające.
+
+\begin{itemize}
+\item
+  Wyniki są skoncentrowane wokół średniej (67.23), z relatywnie małym
+  rozrzutem (odchylenie standardowe 3.83).
+\item
+  Wysoka skośność i kurtoza wskazują na asymetryczność rozkładu i
+  możliwe wartości odstające w wyższych wynikach (np. wyniki 90+).
+\item
+  Wyniki poniżej 60 oraz powyżej 90 mogą wymagać bliższego zbadania, aby
+  określić, czy są to uczniowie ze szczególnymi trudnościami lub
+  osiągający wyjątkowe wyniki.
+\end{itemize}
+
+\subsubsection{Analiza korelacji między
+zmiennymi}\label{analiza-korelacji-miux119dzy-zmiennymi}
+
+W celu oceny, które zmienne są najsilniej powiązane z wynikami
+egzaminacyjnymi, oszcowano model regresji liniowej.
+
+Model regresji liniowej przeprowadzony na dostępnych danych wykazał
+istotne zależności między wieloma czynnikami a wynikami egzaminacyjnymi
+uczniów. Model osiągnął R² = 0.6228, co oznacza, że około 62,3\%
+wariancji wyników egzaminacyjnych można wyjaśnić uwzględnionymi
+zmiennymi.
+
+Najistotniejsze czynniki wpływające na wynik egzaminu
+
+\paragraph{Kluczowe wnioski:}\label{kluczowe-wnioski}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Największy pozytywny wpływ na wyniki egzaminu mają:}
+
+  \begin{itemize}
+  \item
+    Frekwencja (\texttt{Attendance}).
+  \item
+    Liczba godzin nauki (\texttt{Hours\_Studied}).
+  \item
+    Sesje korepetycji (\texttt{Tutoring\_Sessions}).
+  \end{itemize}
+\item
+  \textbf{Negatywny wpływ na wyniki egzaminu mają:}
+
+  \begin{itemize}
+  \item
+    Brak dostępu do zasobów edukacyjnych
+    (\texttt{Access\_to\_Resources}).
+  \item
+    Niskie zaangażowanie rodziców (\texttt{Parental\_Involvement}).
+  \item
+    Niski poziom dochodów rodzinnych (\texttt{Family\_Income}).
+  \end{itemize}
+\item
+  \textbf{Istotność zmiennych:} Wszystkie wymienione zmienne mają bardzo
+  niski poziom wartości p (\texttt{p-value\ \textless{}\ 0.001}), co
+  świadczy o ich wysokiej istotności statystycznej.
+\end{enumerate}
+
+\subsubsection{Wpływ poszczególnych czynników na wyniki
+uczniów}\label{wpux142yw-poszczeguxf3lnych-czynnikuxf3w-na-wyniki-uczniuxf3w}
+
+Przeanalizowano wpływ kluczowych czynników, takich jak liczba godzin
+nauki, frekwencja, dostęp do zasobów edukacyjnych oraz wsparcie rodziców
+na wyniki egzaminacyjne.
+
+\textbf{Analiza wpływu godzin nauki na wynik egzaminu}
+
+Po przeanalizowaniu powyższego wykresu można zauważyć, że uczniowie
+którzy spędzają więcej czasu na nauce osiągają lepsze wyniki
+egzaminacyjne.
+
+Wpływ frekwencji na wynik egzaminu
+
+Wpływ dostępu do zasobów edukacyjnych
+
+Uczniowie z niskim dostępem do zasobów mają znacznie niższe wyniki
+egzaminów w porównaniu do tych z wysokim dostępem. To jedna z kluczowych
+zmiennych negatywnych.
+
+Wpływ zaangażowania rodziców
+
+Podobny wzorzec jak w przypadku zasobów --- niskie zaangażowanie
+rodziców wiąże się z niższymi wynikami.
+
+Wpływ dochodu rodziny na wynik egzaminu
+
+Uczniowie z rodzin o niskim dochodzie osiągają niższe wyniki
+egzaminacyjne w porównaniu do tych z rodzin o wyższym dochodzie.
+
+Wpływ korepetycji
+
+Większa liczba sesji korepetycji wpływa pozytywnie na wyniki
+egzaminacyjne, choć efekt jest nieco słabszy.
+
+\subsubsection{Podsumowanie projektu}\label{podsumowanie-projektu}
+
+Przeprowadzona analiza wyników egzaminacyjnych dostarczyła cennych
+informacji na temat czynników wpływających na sukces edukacyjny uczniów.
+Skoncentrowano się na sześciu kluczowych zmiennych, które w sposób
+istotny wpływają na wyniki: frekwencji, liczbie godzin nauki, liczbie
+sesji korepetycji, dostępie do zasobów edukacyjnych, zaangażowaniu
+rodziców oraz dochodzie rodziny.
+
+Najważniejszymi czynnikami pozytywnie wpływającymi na wyniki egzaminów
+okazały się frekwencja i liczba godzin nauki. Regularne uczęszczanie na
+zajęcia oraz poświęcanie czasu na naukę stanowiły fundamenty wysokich
+osiągnięć. Również sesje korepetycji w znacznym stopniu wspierały wyniki
+uczniów, co sugeruje, że dodatkowe wsparcie edukacyjne może odgrywać
+kluczową rolę w wyrównywaniu braków w wiedzy.
+
+Zidentyfikowano również istotne bariery w edukacji. Ograniczony dostęp
+do zasobów edukacyjnych, niski dochód rodziny oraz niskie zaangażowanie
+rodziców wiązały się z gorszymi wynikami egzaminacyjnymi. Czynniki te są
+szczególnie ważne w kontekście planowania polityk edukacyjnych i
+programów wsparcia.
+
+\subsubsection{Znaczenie analizy wyników
+egzaminacyjnych}\label{znaczenie-analizy-wynikuxf3w-egzaminacyjnych}
+
+Zrozumienie czynników wpływających na wyniki egzaminacyjne jest kluczowe
+z kilku powodów:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Optymalizacja strategii nauczania} Wyniki analizy mogą być
+  wykorzystane przez nauczycieli i decydentów edukacyjnych do
+  dostosowania metod nauczania do indywidualnych potrzeb uczniów. Na
+  przykład wsparcie uczniów z ograniczonym dostępem do zasobów
+  edukacyjnych może obejmować udostępnienie technologii i materiałów
+  dydaktycznych.
+\item
+  \textbf{Wsparcie dla uczniów w trudnej sytuacji} Identyfikacja
+  kluczowych czynników, takich jak niski dochód rodziny czy brak
+  zaangażowania rodziców, pozwala na wdrożenie programów wsparcia
+  skierowanych do najbardziej potrzebujących uczniów. Działania takie
+  mogą obejmować dodatkowe korepetycje, stypendia edukacyjne czy
+  szkolenia dla rodziców.
+\item
+  \textbf{Poprawa efektywności edukacji} Lepsze zrozumienie procesów
+  nauczania i czynników wpływających na wyniki pozwala na skuteczniejsze
+  zarządzanie systemem edukacyjnym. Analiza wyników może służyć jako
+  podstawa do projektowania polityk edukacyjnych, które koncentrują się
+  na najważniejszych obszarach wymagających poprawy.
+\end{enumerate}
+
+Rekomendujemy dalsze inwestycje w programy wspierające uczniów z
+trudnymi warunkami socjoekonomicznymi oraz promowanie aktywnego
+zaangażowania rodziców w proces edukacji. Wyniki naszej analizy
+podkreślają potrzebę holistycznego podejścia do edukacji, które
+uwzględnia różnorodne czynniki wpływające na sukces uczniów. Tylko
+poprzez odpowiednie wsparcie możemy zapewnić równe szanse wszystkim
+uczniom i poprawić jakość edukacji jako całości.
+
+\end{document}

@@ -3,12 +3,12 @@ title: Czynniki wpływające na wyniki egzaminu.
 author:
 - name: Jakub Kołpaczyński, 
 
-- name: SBartosz Kurzyński,
+- name: Bartosz Kurzyński,
 
 - name: Stanisław Kolas
  
 abstract: |
-  Projket analiza danych
+  Projekt analiza danych
 keywords: submission, JEDM, abstract, instructions, style
 bibliography: ref.bib
 output: rticles::jedm_article
@@ -18,7 +18,7 @@ output: rticles::jedm_article
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r setup, include=FALSE}
+```{r setup2, include=FALSE}
 knitr::opts_chunk$set(include = FALSE)
 # Wczytanie danych
 data <- read.csv(file = "czynniki.csv")
@@ -26,7 +26,7 @@ data <- read.csv(file = "czynniki.csv")
 data <- data.frame(data)
 ```
 
-```{r setup, include=FALSE}
+```{r setup3, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 # Wczytywanie wymaganych pakietów
@@ -133,7 +133,7 @@ Aby lepiej zrozumieć rozkład brakujących danych w naszym zbiorze, wykonujemy 
 
 -   Wykres `missing_plot()` przedstawia ogólny wzór brakujących wartości dla kluczowych zmiennych.
 
-```{r echo=FALSE}
+```{r 4.echo=FALSE}
 data <- as.data.frame(data)
 
 data %>%
@@ -145,7 +145,7 @@ data %>%
 
 Po zwizualizowaniu brakujących wartości za pomocą wykresu `missing_plot()` można zauważyć, że w zbiorze danych występują braki w kilku zmiennych.
 
-```{r echo=FALSE}
+```{r 5, echo=FALSE}
   # VIM method
 data %>%
   dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
@@ -208,7 +208,7 @@ Po uprzednim przygotowaniu danych oraz ich zidentyfikowaniu należy przejść do
 
 Przed przystąpieniem do analizy konieczne było usunięcie brakujących wartości oraz poprawienie błędów w danych.
 
-```{r echo=FALSE}
+```{r 6, echo=FALSE}
 czyste_dane %>%
   dplyr::select(Hours_Studied,Attendance, Parental_Involvement,Access_to_Resources, Extracurricular_Activities, Sleep_Hours, 
                 Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type,
@@ -222,7 +222,7 @@ Po zwizualizowaniu danych można zauważyć, że nie ma już pustych wartości w
 
 Analiza korelacji i zależności między zmiennymi pozwala określić, które czynniki mają największy wpływ na wyniki egzaminacyjne. Przeprowadzona analiza obejmuje obliczenie współczynników korelacji Spearmana dla kluczowych zmiennych oraz ich wpływu na wynik końcowy.
 
-```{r echo=FALSE, warning=FALSE}
+```{r 7, echo=FALSE, warning=FALSE}
 # Tworzenie kopii danych, aby nie nadpisywać oryginału
 dane_temp <- czyste_dane
 
@@ -260,7 +260,7 @@ Wyniki wskazują, że samodzielna praca i regularna obecność na zajęciach są
 
 Dane zostały podzielone na grupy w celu ułatwienia analizy i interpretacji wyników.
 
-```{r include=FALSE}
+```{r 8, include=FALSE}
 # Dodanie kolumn 'grupa1' (podział według godzin nauki)
 czyste_dane <- czyste_dane %>%
   mutate(grupa1 = case_when(
@@ -305,7 +305,7 @@ Dla celów analizy dane zostały podzielone na grupy zmianna pokazująca liczbę
 
 Analiza rozkładu wyników egzaminacyjnych pozwala ocenić, jak zróżnicowane są osiągnięcia uczniów oraz czy dane zawierają ewentualne wartości odstające.
 
-```{r echo=FALSE}
+```{r 9, echo=FALSE}
 # Histogram wyników egzaminacyjnych
 ggplot(czyste_dane, aes(x = Exam_Score)) +
   geom_histogram(bins = 20, fill = "blue", color = "black", alpha = 0.7) +
@@ -315,7 +315,7 @@ ggplot(czyste_dane, aes(x = Exam_Score)) +
   theme_minimal()
 ```
 
-```{r echo=FALSE}
+```{r 10, echo=FALSE}
 #Statystyki opisowe
 exam_score_stats <- summary(czyste_dane$Exam_Score)
 std_dev <- sd(czyste_dane$Exam_Score)  # Odchylenie standardowe
@@ -340,7 +340,7 @@ cat("\nKurtoza:", kurtosis)
 
 W celu oceny, które zmienne są najsilniej powiązane z wynikami egzaminacyjnymi, oszcowano model regresji liniowej.
 
-```{r include=FALSE}
+```{r 11, include=FALSE}
 # Regresja liniowa z wszystkimi czynnikami
 model <- lm(Exam_Score ~ Hours_Studied + Attendance + Parental_Involvement + 
               Access_to_Resources + Extracurricular_Activities + Sleep_Hours + 
@@ -353,7 +353,7 @@ model <- lm(Exam_Score ~ Hours_Studied + Attendance + Parental_Involvement +
 summary(model)
 ```
 
-```{r echo=FALSE}
+```{r 12, echo=FALSE}
 summary_model <- summary(model)
 
 # Wyciągnięcie współczynników z modelu
@@ -394,7 +394,7 @@ Najistotniejsze czynniki wpływające na wynik egzaminu
 
 Przeanalizowano wpływ kluczowych czynników, takich jak liczba godzin nauki, frekwencja, dostęp do zasobów edukacyjnych oraz wsparcie rodziców na wyniki egzaminacyjne.
 
-```{r include=FALSE}
+```{r 14, include=FALSE}
 czyste_dane$Access_to_Resources <- factor(czyste_dane$Access_to_Resources, levels = c("Low", "Medium", "High"))
 czyste_dane$Parental_Involvement <- factor(czyste_dane$Parental_Involvement, levels = c("Low", "Medium", "High"))
 czyste_dane$Family_Income <- factor(czyste_dane$Family_Income, levels = c("Low", "Medium", "High"))
@@ -402,7 +402,7 @@ czyste_dane$Family_Income <- factor(czyste_dane$Family_Income, levels = c("Low",
 
 **Analiza wpływu godzin nauki na wynik egzaminu**
 
-```{r echo=FALSE}
+```{r 15, echo=FALSE}
 # Boxplot: Wpływ godzin nauki na wynik egzaminu
 ggplot(czyste_dane, aes(x = grupa1, y = Exam_Score, fill = grupa1)) +
   geom_boxplot() +
@@ -412,7 +412,7 @@ ggplot(czyste_dane, aes(x = grupa1, y = Exam_Score, fill = grupa1)) +
   theme_minimal()
 ```
 
-```{r}
+```{r 16, echo=FALSE}
 #Liczba godzin nauki (Hours_Studied)
 ggplot(czyste_dane, aes(x = Hours_Studied, y = Exam_Score)) +
   geom_point(alpha = 0.6, color = "orange") +
@@ -429,7 +429,7 @@ Po przeanalizowaniu powyższego wykresu można zauważyć, że uczniowie którzy
 
 Wpływ frekwencji na wynik egzaminu
 
-```{r echo=FALSE}
+```{r 17, echo=FALSE}
 # Boxplot: Wpływ frekwencji na wynik egzaminu
 ggplot(czyste_dane, aes(x = grupa2, y = Attendance, fill = grupa2)) +
   geom_boxplot() +
@@ -439,7 +439,7 @@ ggplot(czyste_dane, aes(x = grupa2, y = Attendance, fill = grupa2)) +
   theme_minimal()
 ```
 
-```{r}
+```{r 18, echo=FALSE}
 #Frekwencja (Attendance)
 ggplot(czyste_dane, aes(x = Attendance, y = Exam_Score)) +
   geom_point(alpha = 0.6, color = "orange") +
@@ -454,7 +454,7 @@ ggplot(czyste_dane, aes(x = Attendance, y = Exam_Score)) +
 
 Wpływ dostępu do zasobów edukacyjnych
 
-```{r}
+```{r 19, echo=FALSE}
 #Dostęp do zasobów edukacyjnych (Access_to_Resources)
 ggplot(czyste_dane, aes(x = Access_to_Resources, y = Exam_Score, fill = Access_to_Resources)) +
   geom_boxplot(color = "black", alpha = 0.7) +
@@ -471,7 +471,7 @@ Uczniowie z niskim dostępem do zasobów mają znacznie niższe wyniki egzaminó
 
 Wpływ zaangażowania rodziców
 
-```{r echo=FALSE}
+```{r 20, echo=FALSE}
 # Boxplot: Wpływ zaangażowania rodziców na wynik egzaminu
 ggplot(czyste_dane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement)) +
   geom_boxplot() +
@@ -485,7 +485,7 @@ Podobny wzorzec jak w przypadku zasobów — niskie zaangażowanie rodziców wi�
 
 Wpływ dochodu rodziny na wynik egzaminu
 
-```{r}
+```{r 21, echo=FALSE}
 #Dochód rodziny (Family_Income)
 ggplot(czyste_dane, aes(x = Family_Income, y = Exam_Score, fill = Family_Income)) +
   geom_boxplot(color = "black", alpha = 0.7) +
@@ -502,7 +502,7 @@ Uczniowie z rodzin o niskim dochodzie osiągają niższe wyniki egzaminacyjne w 
 
 Wpływ korepetycji
 
-```{r message=FALSE, warning=FALSE}
+```{r 22, echo=FALSE, message=FALSE, warning=FALSE}
 #Sesje korepetycji (Tutoring_Sessions)
 ggplot(czyste_dane, aes(x = Tutoring_Sessions, y = Exam_Score)) +
   geom_point(alpha = 0.6, color = "orange") +
