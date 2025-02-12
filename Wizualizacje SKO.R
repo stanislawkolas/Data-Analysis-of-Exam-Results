@@ -4,7 +4,7 @@ data <- read.csv(file = "czynniki.csv")
 #stworzenie ramki danych którymi się zajmujemy
 data <- data.frame(data)
 
-#biblioteki potzrebne do imputacji danych
+#biblioteki potrzebne do imputacji danych
 install.packages("dlookr")
 install.packages("editrules") #reguły
 install.packages("VIM")

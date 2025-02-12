@@ -17,7 +17,7 @@ library(validate)
 
 
 summary(data)
-# ustalenie zasad według których dane mają być imputowane oraza jeżeli dane wyrastają poza skalę oznaczane będą jako błedy
+# ustalenie zasad według których dane mają być imputowane oraz jeżeli dane wyrastają poza skalę oznaczane będą jako błedy
 RULE <- validator(Hours_Studied >= 0, 
                     Hours_Studied <= 30,
                   Attendance >= 0,
@@ -47,14 +47,12 @@ RULE <- validator(Hours_Studied >= 0,
 summary(data)
 View(data)
 
-#sprawdzenie ilości danych które nie odpowidaja powyższym regułom ustalonym mna podtawie eksperckiej analizy
+#sprawdzenie ilości danych które nie odpowidaja powyższym regułom ustalonym mna podstawie eksperckiej analizy
 out   <- confront(data, RULE)
 plot(out)
 summary(out)
 
 #zamiana danych typu character na factor
-install.packages("dplyr")
-library(dplyr)
 data <- data %>%
   mutate_if(is.character, as.factor)
 str(data)

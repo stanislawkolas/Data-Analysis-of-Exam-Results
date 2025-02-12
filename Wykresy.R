@@ -123,6 +123,11 @@ ggplot(czyste_dane, aes(x = grupa2, y = Exam_Score, color = grupa2)) +
 # Tworzymy tabelę częstości
 library(kableExtra)
 library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(RColorBrewer)
+install.packages("tidyr")
+library(tidyr)
 
 tabela_kable <- table(czyste_dane$grupa2, czyste_dane$Extracurricular_Activities) 
 
@@ -182,15 +187,19 @@ ggplot(czyste_dane, aes(x = Internet_Access, y = Exam_Score, fill = Exam_Score))
   ) +
   scale_fill_brewer(palette = "Set5") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+#10. Wykres zależności grupa 2 od Internet_Access
+# Przygotowanie danych: grupowanie i liczenie wystąpień
+czyste_dane_heatmap <- czyste_dane %>%
+  group_by(grupa2, Internet_Access) %>%
+  summarise(count = n(), .groups = "drop")
 
-#10. Wykres zależności Exam_Score od Access_to_Resources
-ggplot(czyste_dane, aes(x = Access_to_Resources, y = Exam_Score, fill = Exam_Score)) +
-  geom_boxplot() +
-  theme_minimal() +
-  labs(
-    title = "Zależność wyniku egzaminu od dostępu do zasobów",
-    x = "Dostęp do zasobów",
-    y = "Ocena z egzaminu"
-  ) +
-  scale_fill_brewer(palette = "Set5") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# Tworzenie wykresu heatmapy
+ggplot(czyste_dane_heatmap, aes(x = grupa2, y = Internet_Access, fill = count)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "red") +
+  labs(title = "Heatmapa: Grupa2 vs Internet_Access",
+       x = "Grupa 2",
+       y = "Dostęp do Internetu",
+       fill = "Liczba wystąpień") +
+  theme_minimal()
+
