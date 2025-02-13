@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = TRUE)
 required_packages <- c("dplyr", "ggplot2", "finalfit", "VIM", "validate", 
         "errorlocate", "tidyverse", "ggcorrplot", "forcats",
         "ggthemes","tidyverse","dlookr","editrules","hrbrthemes","plotly",
-        "ISLR","gapminder","kableExtra","ggstatsplot","gtsummary","readr","rmarkdown","moments","knitr", "kableExtra")
+        "ISLR","gapminder","kableExtra","ggstatsplot","gtsummary","readr","rmarkdown","moments","knitr", "kableExtra","moments")
 
 # Sprawdzenie i instalacja brakujących pakietów
 install_if_missing <- function(pkg) {
@@ -63,6 +63,8 @@ library(gtsummary)
 library(readr)
 library(moments)
 library(rmarkdown)
+library(knitr)
+library(moments)
 ```
 
 # Analiza czynników wpływających na wyniki z egzaminów studentów
@@ -169,7 +171,7 @@ data %>%
 
 Po zwizualizowaniu brakujących wartości za pomocą wykresu
 `missing_plot()` można zauważyć, że w zbiorze danych występują braki w
-kilku zmiennych.
+pięciu zmiennych.
 
 ```{r wykres2, echo=FALSE}
   # VIM method
@@ -190,6 +192,53 @@ Można stwierdzić, że braki w danych są losowe.
 Pierwszą rzeczą jest ustalenie reguł dla wszystkich danych istniejących
 oraz imputowanych. Pozwala to na usunięcie wartości skrajnie
 odstających, które mogły być błędem przy wprowadzaniu danych.
+
+Zastosowane reguły wyglądają następująco:
+
+-   Godziny nauki (Hours_Studied): wartość musi mieścić się w przedziale
+    od 0 do 30.
+-   Frekwencja (Attendance): wartość musi mieścić się w przedziale od 0%
+    do 100%.
+-   Zaangażowanie rodziców (Parental_Involvement): wartość musi należeć
+    do jednego z trzech poziomów: Low (niskie), Medium (średnie) lub
+    High (wysokie).
+-   Dostęp do zasobów edukacyjnych (Access_to_Resources): wartość musi
+    być jedną z trzech kategorii: Low (niski), Medium (średni) lub High
+    (wysoki).
+-   Udział w zajęciach pozalekcyjnych (Extracurricular_Activities):
+    wartość musi wynosić Yes (tak) lub No (nie).
+-   Liczba godzin snu (Sleep_Hours): wartość nie może być ujemna.
+-   Poprzednie wyniki (Previous_Scores): wartość musi mieścić się w
+    zakresie od 0 do 100.
+-   Poziom motywacji (Motivation_Level): wartość musi należeć do jednej
+    z trzech kategorii: Low (niski), Medium (średni) lub High (wysoki).
+-   Dostęp do Internetu (Internet_Access): wartość musi wynosić Yes
+    (tak) lub No (nie).
+-   Liczba korepetycji (Tutoring_Sessions): wartość nie może być ujemna.
+-   Dochód rodziny (Family_Income): wartość musi należeć do jednej z
+    trzech kategorii: Low (niski), Medium (średni) lub High (wysoki).
+-   Jakość nauczania (Teacher_Quality): wartość musi należeć do jednej z
+    trzech kategorii: Low (niska), Medium (średnia) lub High (wysoka).
+-   Typ szkoły (School_Type): wartość musi wynosić Public (publiczna)
+    lub Private (prywatna).
+-   Wpływ rówieśników (Peer_Influence): wartość musi należeć do jednej z
+    trzech kategorii: Negative (negatywny), Neutral (neutralny) lub
+    Positive (pozytywny).
+-   Aktywność fizyczna (Physical_Activity): wartość musi mieścić się w
+    przedziale od 0 do 25.
+-   Trudności w nauce (Learning_Disabilities): wartość musi wynosić Yes
+    (tak) lub No (nie).
+-   Poziom wykształcenia rodziców (Parental_Education_Level): wartość
+    musi należeć do jednej z trzech kategorii: High School (szkoła
+    średnia), College (studia licencjackie) lub Postgraduate (studia
+    podyplomowe).
+-   Odległość szkoły od domu (Distance_from_Home): wartość musi należeć
+    do jednej z trzech kategorii: Near (blisko), Moderate (średnia) lub
+    Far (daleko).
+-   Płeć (Gender): wartość musi wynosić Male (mężczyzna) lub Female
+    (kobieta).
+-   Wynik egzaminu (Exam_Score): wartość musi mieścić się w zakresie od
+    0 do 100.
 
 ```{r wykres3, include=FALSE}
 RULE <- validator(Hours_Studied >= 0, 
@@ -212,15 +261,15 @@ RULE <- validator(Hours_Studied >= 0,
                   Physical_Activity >= 0,
                     Physical_Activity <= 25,
                   Learning_Disabilities %in% c("No","Yes"),
-                  Parental_Education_Level %in% c("High School","College","Postgraduate"),
+                  Parental_Education_Level %in% c("High School","College" ,"Postgraduate"),
                   Distance_from_Home %in% c("Near","Moderate","Far"),
                   Gender %in% c("Male","Female"),
                   Exam_Score >= 0,
                   Exam_Score <= 100)
 ```
 
-```{r}
-#sprawdzenie ilości danych które nie odpowidaja powyższym regułom ustalonym mna podstawie eksperckiej analizy
+```{r tak}
+#sprawdzenie ilości danych które nie odpowiadaja powyższym regułom ustalonym na podstawie eksperckiej analizy
 out   <- confront(data, RULE)
 
 #zamiana danych typu character na factor
@@ -379,27 +428,48 @@ ggplot(czyste_dane, aes(x = Exam_Score)) +
 ```{r wykres110, echo=FALSE}
 #Statystyki opisowe
 exam_score_stats <- summary(czyste_dane$Exam_Score)
-std_dev <- sd(czyste_dane$Exam_Score)  # Odchylenie standardowe
-skewness <- moments::skewness(czyste_dane$Exam_Score)  # Skośność
-kurtosis <- moments::kurtosis(czyste_dane$Exam_Score)  # Kurtoza
+std_dev <- sd(czyste_dane$Exam_Score)
+skewness <- moments::skewness(czyste_dane$Exam_Score)
+kurtosis <- moments::kurtosis(czyste_dane$Exam_Score)
 
-# Wyświetlenie statystyk
-cat("Statystyki opisowe dla 'Exam_Score':\n")
-print(exam_score_stats)
-cat("\nOdchylenie standardowe:", std_dev)
-cat("\nSkośność:", skewness)
-cat("\nKurtoza:", kurtosis)
+stats_table <- data.frame(
+  Statystyka = c("Min", "1st Quartile", "Median", "Mean", "3rd Quartile", "Max", 
+                 "Standard Deviation", "Skewness", "Kurtosis"),
+  Wartość = c(exam_score_stats[1], exam_score_stats[2], exam_score_stats[3], 
+              exam_score_stats[4], exam_score_stats[5], exam_score_stats[6], 
+              std_dev, skewness, kurtosis))
+  kable(stats_table, caption = "Statystyki opisowe dla wyników egzaminacyjnych", digits = 1, align = "c")
+
 ```
 
--   Wyniki są skoncentrowane wokół średniej (67.23), z relatywnie małym
-    rozrzutem (odchylenie standardowe 3.83).
+Interpretacja:
 
--   Wysoka skośność i kurtoza wskazują na asymetryczność rozkładu i
-    możliwe wartości odstające w wyższych wynikach (np. wyniki 90+).
+-   Rozstęp wyników: Najniższy wynik egzaminacyjny wyniósł 56, a
+    najwyższy 100.
 
--   Wyniki poniżej 60 oraz powyżej 90 mogą wymagać bliższego zbadania,
-    aby określić, czy są to uczniowie ze szczególnymi trudnościami lub
-    osiągający wyjątkowe wyniki.
+-   1st Quartile (Q1, 25%): 65 → 25% uczniów uzyskało wynik niższy niż
+    65.
+
+-   Mediana (Q2, 50%): 67 → Środkowy wynik w zbiorze danych, połowa
+    uczniów ma wynik poniżej, a połowa powyżej 67.
+
+-   3rd Quartile (Q3, 75%): 69 → 75% uczniów miało wynik niższy niż 69.
+
+-   Średnia (Mean): 67,2 → Średnia arytmetyczna wyników jest zbliżona do
+    mediany, co sugeruje względnie symetryczny rozkład danych.
+
+-   Odchylenie standardowe: 3,9 Średnie odchylenie wyników od średniej
+    wynosi 3,9 punktu. To dość niska wartość, co wskazuje na niewielkie
+    zróżnicowanie wyników między uczniami.
+
+-   Skośność (Skewness): 1,6 Wartość dodatnia sugeruje, że rozkład
+    wyników jest prawostronnie skośny – oznacza to, że więcej uczniów
+    uzyskało wyniki niższe od średniej, a kilka wyników bardzo wysokich
+    „ciągnie” średnią w górę.
+
+-   Kurtoza (Kurtosis): 13,4 Wartość znacznie większa od 3 sugeruje, że
+    rozkład jest leptokurtyczny, czyli mocno skupiony wokół średniej,
+    ale z długimi ogonami (możliwe występowanie wartości skrajnych).
 
 ### Analiza korelacji między zmiennymi
 
@@ -509,7 +579,9 @@ statystyki_opisowe <- czyste_dane %>%
   group_by(grupa1) %>%
   summarise(
     Średnia = mean(Exam_Score, na.rm = TRUE),
+    Q1 = quantile(Exam_Score, 0.25, na.rm = TRUE),
     Mediana = median(Exam_Score, na.rm = TRUE),
+    Q3 = quantile(Exam_Score, 0.75, na.rm = TRUE),
     Odchylenie_std = sd(Exam_Score, na.rm = TRUE),
     Min = min(Exam_Score, na.rm = TRUE),
     Max = max(Exam_Score, na.rm = TRUE),
@@ -533,9 +605,9 @@ statystyki_opisowe %>%
   kable(caption = "Tabela statystyk opisowych dla grup godzin nauki") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "green") %>%
   column_spec(1, bold = TRUE, color = "black") %>%  
-  column_spec(2:6, background = "#E3F2FD") 
+  column_spec(2:8, background = "lightblue") 
 ```
 
 Średni wynik egzaminu rośnie wraz z liczbą godzin nauki (65,25 → 68,99),
@@ -552,15 +624,15 @@ Najliczniejsza grupa to uczniowie uczący się 16–23 godziny (N = 3400),
 podczas gdy mniej uczniów uczy się poniżej 16 godzin (N = 1567) lub
 powyżej 23 godzin (N = 1640).
 
-```{r}
+```{r anovagodz, echo=FALSE}
 # tabela ANOVA
 anova_table %>%
   kable(caption = "Tabela ANOVA: Wpływ godzin nauki na wynik egzaminu") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#FF5722") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "red") %>%
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:5, background = "#FFF3E0")
+  column_spec(2:5, background = "lightyellow")
 ```
 
 (F = 432.73, p \< 0.001). Oznacza to, że średnie wyniki egzaminu
@@ -597,7 +669,9 @@ statystyki_opisowe_oceny <- czyste_dane %>%
   group_by(grupa2) %>%
   summarise(
     Średnia = mean(Attendance, na.rm = TRUE),
+    Q1 = quantile(Attendance, 0.25, na.rm = TRUE),
     Mediana = median(Attendance, na.rm = TRUE),
+    Q3 = quantile(Attendance, 0.75, na.rm = TRUE),
     Odchylenie_std = sd(Attendance, na.rm = TRUE),
     Min = min(Attendance, na.rm = TRUE),
     Max = max(Attendance, na.rm = TRUE),
@@ -621,9 +695,9 @@ statystyki_opisowe_oceny %>%
   kable(caption = "Tabela statystyk opisowych dla Frekwencji") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "green") %>%
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:6, background = "#E3F2FD")
+  column_spec(2:8, background = "lightblue")
 ```
 
 Analiza wyników wskazuje, że średnia frekwencja rośnie wraz z oceną, od
@@ -643,15 +717,15 @@ sugeruje, że większość osiąga średnie wyniki, podczas gdy oceny 4.5 i
 5.0 są rzadkie (N = 19 i N = 20), co może ograniczać ich
 reprezentatywność.
 
-```{r}
+```{r anovafrek, echo=FALSE}
 # tabela ANOVA
 anova_table_oceny %>%
   kable(caption = "Tabela ANOVA: Wpływ Frekwencji na Wyniki Egzaminu") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"),
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#FF5722") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "red") %>%
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:5, background = "#FFF3E0")
+  column_spec(2:5, background = "lightyellow")
 ```
 
 Analiza wariancji (ANOVA) wykazała, że oceny egzaminu mają istotny wpływ
@@ -683,7 +757,9 @@ statystyki_opisowe_zasoby <- czyste_dane %>%
   group_by(Access_to_Resources) %>%
   summarise(
     Średnia = mean(Exam_Score, na.rm = TRUE),
+    Q1 = quantile(Exam_Score, 0.25, na.rm = TRUE),
     Mediana = median(Exam_Score, na.rm = TRUE),
+    Q3 = quantile(Attendance, 0.75, na.rm = TRUE),
     Odchylenie_std = sd(Exam_Score, na.rm = TRUE),
     Min = min(Exam_Score, na.rm = TRUE),
     Max = max(Exam_Score, na.rm = TRUE),
@@ -707,9 +783,9 @@ statystyki_opisowe_zasoby %>%
   kable(caption = "Tabela statystyk opisowych dla dostępu do zasobów edukacyjnych") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "green") %>%
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:6, background = "#E3F2FD")
+  column_spec(2:8, background = "lightblue")
 ```
 
 Średni wynik egzaminu rośnie wraz z dostępem do zasobów edukacyjnych, od
@@ -728,15 +804,15 @@ wyników. Najliczniejsza jest grupa uczniów ze średnim dostępem do
 zasobów (N = 3319), a najmniej liczna – z niskim dostępem (N = 1313),
 choć nadal stanowi ona istotną grupę porównawczą.
 
-```{r}
+```{r anovazasob, echo=FALSE}
 # tabela ANOVA
 anova_table_zasoby %>%
   kable(caption = "Tabela ANOVA: Wpływ dostępu do zasobów edukacyjnych na wynik egzaminu") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#FF5722") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "red") %>%
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:5, background = "#FFF3E0")
+  column_spec(2:5, background = "lightyellow")
 ```
 
 Analiza wariancji (ANOVA) wykazała, że dostęp do zasobów edukacyjnych
@@ -757,14 +833,15 @@ ggplot(czyste_dane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parenta
 Podobny wzorzec jak w przypadku zasobów — niskie zaangażowanie rodziców
 wiąże się z niższymi wynikami.
 
-
 ```{r statystyki_anova_rodzice, echo=FALSE, message=FALSE, warning=FALSE}
 # Obliczanie statystyk opisowych dla poziomu zaangażowania rodziców
 statystyki_opisowe_rodzice <- czyste_dane %>%
   group_by(Parental_Involvement) %>%
   summarise(
     Średnia = mean(Exam_Score, na.rm = TRUE),
+    Q1 = quantile(Exam_Score, 0.25, na.rm = TRUE),
     Mediana = median(Exam_Score, na.rm = TRUE),
+    Q3 = quantile(Exam_Score, 0.75, na.rm = TRUE),
     Odchylenie_std = sd(Exam_Score, na.rm = TRUE),
     Min = min(Exam_Score, na.rm = TRUE),
     Max = max(Exam_Score, na.rm = TRUE),
@@ -788,9 +865,9 @@ statystyki_opisowe_rodzice %>%
   kable(caption = "Tabela statystyk opisowych dla zaangażowania rodziców") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "green") %>%
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:6, background = "#E3F2FD")
+  column_spec(2:8, background = "lightblue")
 ```
 
 Średni wynik egzaminu wzrasta wraz z zaangażowaniem rodziców, od 66,39
@@ -811,21 +888,21 @@ Najwięcej uczniów należy do grupy średniego zaangażowania rodziców (N =
 3362), a najmniej do grupy niskiego zaangażowania (N = 1337), co
 wskazuje, że umiarkowane wsparcie jest najczęstsze.
 
-```{r}
+```{r anovazaan, echo=FALSE}
 # tabela ANOVA
 anova_table_rodzice %>%
   kable(caption = "Tabela ANOVA: Wpływ zaangażowania rodziców na wynik egzaminu") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#FF5722") %>% 
+  row_spec(0, bold = TRUE, color = "white", background = "red") %>% 
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:5, background = "#FFF3E0")
+  column_spec(2:5, background = "lightyellow")
 ```
 
 Analiza wariancji (ANOVA) wykazała, że zaangażowanie rodziców istotnie
 wpływa na wynik egzaminu (F = 71.62, p \< 0.001).
 
-Wpływ dochodu rodziny na wynik egzaminu
+**Wpływ dochodu rodziny na wynik egzaminu**
 
 ```{r wykres18, echo=FALSE, message=FALSE, warning=FALSE}
 #Dochód rodziny (Family_Income)
@@ -850,7 +927,9 @@ statystyki_opisowe_dochod <- czyste_dane %>%
   group_by(Family_Income) %>%
   summarise(
     Średnia = mean(Exam_Score, na.rm = TRUE),
+    Q1 = quantile(Exam_Score, 0.25, na.rm = TRUE),
     Mediana = median(Exam_Score, na.rm = TRUE),
+    Q3 = quantile(Exam_Score, 0.75, na.rm = TRUE),
     Odchylenie_std = sd(Exam_Score, na.rm = TRUE),
     Min = min(Exam_Score, na.rm = TRUE),
     Max = max(Exam_Score, na.rm = TRUE),
@@ -874,29 +953,39 @@ statystyki_opisowe_dochod %>%
   kable(caption = "Tabela statystyk opisowych dla dochodu rodziny") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "green") %>%
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:6, background = "#E3F2FD")
+  column_spec(2:8, background = "lightblue")
 ```
 
-Średni wynik egzaminu rośnie wraz z dochodem (66,85 → 67,75), ale różnice są niewielkie (~1 punkt). Mediana wyników (67–68) pozostaje niemal identyczna, co sugeruje podobne osiągnięcia uczniów niezależnie od dochodu.
+Średni wynik egzaminu rośnie wraz z dochodem (66,85 → 67,75), ale
+różnice są niewielkie (\~1 punkt). Mediana wyników (67–68) pozostaje
+niemal identyczna, co sugeruje podobne osiągnięcia uczniów niezależnie
+od dochodu.
 
-Rozproszenie wyników jest zbliżone we wszystkich grupach (odchylenie standardowe ~3,7–4,0), co wskazuje na brak istotnych różnic w wpływie dochodu na indywidualne wyniki. Minimalne wyniki (56–58) są podobne, natomiast maksymalne rosną wraz z dochodem (97 → 100), co może sugerować większe szanse na najwyższe wyniki wśród uczniów z bogatszych rodzin.
+Rozproszenie wyników jest zbliżone we wszystkich grupach (odchylenie
+standardowe \~3,7–4,0), co wskazuje na brak istotnych różnic w wpływie
+dochodu na indywidualne wyniki. Minimalne wyniki (56–58) są podobne,
+natomiast maksymalne rosną wraz z dochodem (97 → 100), co może sugerować
+większe szanse na najwyższe wyniki wśród uczniów z bogatszych rodzin.
 
-Większość uczniów pochodzi z rodzin o niskim lub średnim dochodzie (2676 i 2660 uczniów), a najmniej z rodzin o wysokim dochodzie (1271 uczniów), co odzwierciedla ogólną strukturę społeczną.
+Większość uczniów pochodzi z rodzin o niskim lub średnim dochodzie (2676
+i 2660 uczniów), a najmniej z rodzin o wysokim dochodzie (1271 uczniów),
+co odzwierciedla ogólną strukturę społeczną.
 
-```{r}
+```{r anovadochod, echo=FALSE}
 # tabela ANOVA
 anova_table_dochod %>%
   kable(caption = "Tabela ANOVA: Wpływ dochodu rodziny na wynik egzaminu") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#FF5722") %>%
-  column_spec(2:5, background = "#FFF3E0")
+  row_spec(0, bold = TRUE, color = "white", background = "red") %>%
+  column_spec(2:5, background = "lightyellow")
 ```
 
-Analiza wariancji (ANOVA) wykazała, że poziom dochodu rodziny ma istotny wpływ na wynik egzaminu (F = 25.96, p < 0.001).
- 
+Analiza wariancji (ANOVA) wykazała, że poziom dochodu rodziny ma istotny
+wpływ na wynik egzaminu (F = 25.96, p \< 0.001).
+
 Wpływ korepetycji
 
 ```{r wykres40, echo=FALSE, message=FALSE, warning=FALSE}
@@ -921,7 +1010,9 @@ statystyki_opisowe_korepetycje <- czyste_dane %>%
   group_by(Tutoring_Sessions) %>%
   summarise(
     Średnia = mean(Exam_Score, na.rm = TRUE),
+    Q1 = quantile(Exam_Score, 0.25, na.rm = TRUE),
     Mediana = median(Exam_Score, na.rm = TRUE),
+    Q3 = quantile(Exam_Score, 0.75, na.rm = TRUE),
     Odchylenie_std = sd(Exam_Score, na.rm = TRUE),
     Min = min(Exam_Score, na.rm = TRUE),
     Max = max(Exam_Score, na.rm = TRUE),
@@ -945,27 +1036,115 @@ statystyki_opisowe_korepetycje %>%
   kable(caption = "Tabela statystyk opisowych dla liczby sesji korepetycji") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "green") %>%
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:6, background = "#E3F2FD")
+  column_spec(2:8, background = "lightblue")
 ```
 
-Analiza wyników pokazuje, że średni wynik egzaminu rośnie wraz z liczbą sesji korepetycji, od 66,55 przy braku korepetycji do 71,44 przy 6 sesjach, choć efekt nie jest bardzo silny (1–3 punkty różnicy). Najwyższa średnia występuje przy 6 sesjach, ale grupa ta jest bardzo mała (N=18), co może zaburzać reprezentatywność wyników. Mediana wyników wykazuje podobny trend wzrostowy, co potwierdza pozytywny wpływ korepetycji na wyniki egzaminu.
+Analiza wyników pokazuje, że średni wynik egzaminu rośnie wraz z liczbą
+sesji korepetycji, od 66,55 przy braku korepetycji do 71,44 przy 6
+sesjach, choć efekt nie jest bardzo silny (1–3 punkty różnicy).
+Najwyższa średnia występuje przy 6 sesjach, ale grupa ta jest bardzo
+mała (N=18), co może zaburzać reprezentatywność wyników. Mediana wyników
+wykazuje podobny trend wzrostowy, co potwierdza pozytywny wpływ
+korepetycji na wyniki egzaminu.
 
-Rozproszenie wyników pozostaje stabilne (odchylenie standardowe ~3,6–4,1), przy czym najmniejsza zmienność występuje przy 5 sesjach (3,62), a największa przy 6 sesjach (4,12), co sugeruje, że wpływ korepetycji może być różny dla poszczególnych uczniów. Minimalne wyniki (56–59) są podobne we wszystkich grupach, co oznacza, że nawet liczne korepetycje nie gwarantują wysokich ocen. Najwyższe wyniki (100 punktów) pojawiają się przy 3 sesjach, natomiast przy 6 sesjach maksymalny wynik to 78 punktów, co może sugerować, że korepetycje pomagają uzyskać stabilne, ale niekoniecznie najwyższe wyniki.
+Rozproszenie wyników pozostaje stabilne (odchylenie standardowe
+\~3,6–4,1), przy czym najmniejsza zmienność występuje przy 5 sesjach
+(3,62), a największa przy 6 sesjach (4,12), co sugeruje, że wpływ
+korepetycji może być różny dla poszczególnych uczniów. Minimalne wyniki
+(56–59) są podobne we wszystkich grupach, co oznacza, że nawet liczne
+korepetycje nie gwarantują wysokich ocen. Najwyższe wyniki (100 punktów)
+pojawiają się przy 3 sesjach, natomiast przy 6 sesjach maksymalny wynik
+to 78 punktów, co może sugerować, że korepetycje pomagają uzyskać
+stabilne, ale niekoniecznie najwyższe wyniki.
 
-Najwięcej uczniów korzystało z 1–2 sesji korepetycji (N = 2179 i 1649), co wskazuje, że umiarkowana liczba korepetycji jest najczęściej wybierana. Grupy z większą liczbą sesji (6–8) są znacznie mniejsze (poniżej 20 uczniów), co sprawia, że ich wyniki mogą nie być w pełni miarodajne.
+Najwięcej uczniów korzystało z 1–2 sesji korepetycji (N = 2179 i 1649),
+co wskazuje, że umiarkowana liczba korepetycji jest najczęściej
+wybierana. Grupy z większą liczbą sesji (6–8) są znacznie mniejsze
+(poniżej 20 uczniów), co sprawia, że ich wyniki mogą nie być w pełni
+miarodajne.
 
-```{r}
+```{r anovakor, echo=FALSE}
 # tabela ANOVA
 anova_table_korepetycje %>%
   kable(caption = "Tabela ANOVA: Wpływ liczby sesji korepetycji na wynik egzaminu") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "bordered", "responsive"), 
                 full_width = FALSE, font_size = 14) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#FF5722") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "red") %>%
   column_spec(1, bold = TRUE, color = "black") %>%
-  column_spec(2:5, background = "#FFF3E0")
+  column_spec(2:5, background = "lightyellow")
 ```
+
+## Wnioskowanie statystyczne
+
+```{r ggstats1, echo=FALSE}
+library(ggstatsplot)
+gghistostats(czyste_dane, 
+             x= Exam_Score,
+             binwidth =0.5,
+             xlab = "Wynik egzaminu",
+             title = "Analiza rozkładu wyników egzaminu",
+             caption = NULL,
+             type = "parametric",
+             bf.message = FALSE
+             )
+```
+
+Histogram przedstawia rozkład wyników egzaminacyjnych i ukazuje sposób,
+w jaki rozkładają się wyniki wśród 6 607 obserwacji. Już na pierwszy
+rzut oka widać, że rozkład ten jest zbliżony do rozkładu normalnego,
+jednak można zauważyć pewne odchylenia. Średnia wartość wyniku
+egzaminacyjnego wynosi 67,21, co oznacza, że większość uczniów uzyskała
+wynik w okolicach tej wartości. Dodatkowo na wykresie zaznaczono
+przerywaną linią średnią arytmetyczną, co pozwala łatwo zidentyfikować,
+wokół jakiej wartości koncentrują się wyniki.
+
+Chociaż rozkład na pierwszy rzut oka przypomina rozkład normalny,
+występuje pewna prawostronna skośność, co sugeruje, że większa liczba
+uczniów uzyskała wyniki poniżej średniej, a w kierunku wyższych wartości
+pojawia się wydłużony „ogon”. Oznacza to, że istnieje grupa uczniów
+osiągających znacznie lepsze wyniki, co może świadczyć o istnieniu
+elitarnych jednostek lub wpływie dodatkowych czynników, takich jak
+dostęp do korepetycji, zasoby edukacyjne czy indywidualne predyspozycje.
+
+Test t-Studenta (t(6606)=1410.70,p=0.00t(6606)=1410.70,p=0.00) wskazuje,
+że średni wynik egzaminacyjny jest statystycznie istotnie różny od zera.
+Wartość p = 0.00 sugeruje, że prawdopodobieństwo przypadkowego uzyskania
+takiego wyniku jest bliskie zeru, co oznacza, że istnieją rzeczywiste
+czynniki wpływające na rozkład wyników. Co więcej, przedział ufności 95%
+dla oszacowanej wartości średniej wynosi [17,06; 17,65], co oznacza, że
+średni wynik egzaminacyjny w populacji można oszacować z dużą precyzją i
+nie jest on efektem losowych fluktuacji.
+
+```{r ggstats2, echo=FALSE}
+ggbetweenstats(
+  data = czyste_dane,
+  x = grupa1,
+  y = Exam_Score,
+  title = "Analiza wyników egzaminacyjnych według godzin nauki",
+  xlab = "Liczba godzin nauki",
+  ylab = "Wynik egzaminu",
+  pairwise.comparisons = TRUE,
+  pairwise.display = "significant",
+  type = "parametric", 
+  mean.plotting = TRUE,
+  mean.ci = TRUE,
+  bf.message = FALSE
+)
+```
+
+Wyniki analizy wykazały istotną statystycznie różnicę pomiędzy grupami
+(F(2, 3249.47) = 377.39, p \< 0.001), co oznacza, że liczba godzin nauki
+wpływa na osiągane wyniki egzaminacyjne.
+
+Dodatkowe testy post-hoc (Games-Howell) wykazały, że różnice między
+wszystkimi grupami są statystycznie istotne (p \< 0.05). Oznacza to, że
+każda z grup różni się od pozostałych pod względem wyników
+egzaminacyjnych.
+
+Analiza wykazała, że liczba godzin nauki ma istotny wpływ na wyniki
+egzaminacyjne, ale nie jest jedynym czynnikiem determinującym sukces.
 
 ## Podsumowanie projektu
 
