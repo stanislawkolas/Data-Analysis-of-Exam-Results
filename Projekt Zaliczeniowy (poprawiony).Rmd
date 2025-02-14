@@ -532,7 +532,7 @@ wariancji wyników egzaminacyjnych można wyjaśnić uwzględnionymi
 zmiennymi.
 
 #### Kluczowe wnioski:
-Najistotniejsze czynniki wpływające na wynik egzaminu
+**Najistotniejsze czynniki wpływające na wynik egzaminu**
 
 1.  **Największy pozytywny wpływ na wyniki egzaminu mają:**
 
@@ -660,7 +660,7 @@ anova_table %>%
 (F = 432.73, p \< 0.001). Oznacza to, że średnie wyniki egzaminu
 znacznie różnią się między grupami uczniów o różnych poziomach nauki.
 
-Wpływ frekwencji na wynik egzaminu
+**Wpływ frekwencji na wynik egzaminu**
 
 ```{r wykres14, echo=FALSE, message=FALSE, warning=FALSE}
 # Boxplot: Wpływ frekwencji na wynik egzaminu
@@ -753,7 +753,7 @@ anova_table_oceny %>%
 Analiza wariancji (ANOVA) wykazała, że oceny egzaminu mają istotny wpływ
 na frekwencję (F = 697.81, p \< 0.001).
 
-Wpływ dostępu do zasobów edukacyjnych
+**Wpływ dostępu do zasobów edukacyjnych**
 
 ```{r wykres16, echo=FALSE, message=FALSE, warning=FALSE}
 #Dostęp do zasobów edukacyjnych (Access_to_Resources)
@@ -840,7 +840,7 @@ anova_table_zasoby %>%
 Analiza wariancji (ANOVA) wykazała, że dostęp do zasobów edukacyjnych
 istotnie wpływa na wynik egzaminu (F = 90.53, p \< 0.001).
 
-Wpływ zaangażowania rodziców
+**Wpływ zaangażowania rodziców**
 
 ```{r wykres100, echo=FALSE, message=FALSE, warning=FALSE}
 # Boxplot: Wpływ zaangażowania rodziców na wynik egzaminu
@@ -1008,7 +1008,7 @@ anova_table_dochod %>%
 Analiza wariancji (ANOVA) wykazała, że poziom dochodu rodziny ma istotny
 wpływ na wynik egzaminu (F = 25.96, p \< 0.001).
 
-Wpływ korepetycji
+**Wpływ korepetycji na wynik egzaminu**
 
 ```{r wykres40, echo=FALSE, message=FALSE, warning=FALSE}
 #Sesje korepetycji (Tutoring_Sessions)
