@@ -10,7 +10,7 @@ output:
     number_sections: true
     keep_md: true
     df_print: paged
-date: "2025-01-31"
+date: "2025-02-14"
 editor_options:
   markdown:
     wrap: 72
@@ -183,7 +183,7 @@ data %>%
              prop    = FALSE) 
 ```
 
-Po przealizowaniu przedstawionych wykresów można dość do wnioksku, iż
+Po przealizowaniu przedstawionych wykresów można dość do wniosku, iż
 brakujące dane nie są w żaden sposób skorelowane z innymi zmiennymi.
 Można stwierdzić, że braki w danych są losowe.
 
@@ -269,7 +269,7 @@ RULE <- validator(Hours_Studied >= 0,
 ```
 
 ```{r tak}
-#sprawdzenie ilości danych które nie odpowiadaja powyższym regułom ustalonym na podstawie eksperckiej analizy
+#sprawdzenie ilości danych które nie odpowiadaja powyższym regułom
 out   <- confront(data, RULE)
 
 #zamiana danych typu character na factor
@@ -338,8 +338,21 @@ cor_results <- sapply(setdiff(all_numeric_vars, "Exam_Score"), function(var) {
 # Posortowanie wyników wg wartości bezwzględnej korelacji (od najsilniejszej)
 cor_results_sorted <- sort(abs(cor_results), decreasing = TRUE)
 
-# Wyświetlenie wyników
-print(cor_results_sorted)
+# Stworzenie ramki danych z wynikami korelacji
+cor_results_df <- data.frame(
+  Variable = c("Attendance", "Hours_Studied", "Previous_Scores", "Tutoring_Sessions",
+               "Peer_Influence", "Learning_Disabilities", "Access_to_Resources", "Distance_from_Home",
+               "Parental_Involvement", "Extracurricular_Activities", "Internet_Access", "Teacher_Quality",
+               "Parental_Education_Level", "Physical_Activity", "Family_Income", "Motivation_Level",
+               "Sleep_Hours", "Gender", "School_Type"),
+  Spearman_Rho = c(0.6358, 0.4046, 0.1849, 0.1523, 0.1050, 0.0962, 0.0944, 0.0904,
+                    0.0715, 0.0632, 0.0631, 0.0582, 0.0473, 0.0311, 0.0119, 0.0076,
+                    0.0067, 0.0058, 0.0021)
+)
+
+# Stworzenie tabeli z pakietem kable
+kable(cor_results_df, caption = "Wartości współczynnika korelacji Spearmana względem wyniku egzaminu") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 Przeprowadzona analiza wykazała, że frekwencja *(Attendance)* oraz
@@ -448,7 +461,8 @@ Interpretacja:
     najwyższy 100.
 
 -   1st Quartile (Q1, 25%): 65 → 25% uczniów uzyskało wynik niższy niż
-    65.
+
+    65. 
 
 -   Mediana (Q2, 50%): 67 → Środkowy wynik w zbiorze danych, połowa
     uczniów ma wynik poniżej, a połowa powyżej 67.
@@ -490,6 +504,7 @@ summary(model)
 ```
 
 ```{r wykres10, echo=FALSE}
+# Pobranie podsumowania modelu
 summary_model <- summary(model)
 
 # Wyciągnięcie współczynników z modelu
@@ -498,8 +513,16 @@ coefficients <- summary_model$coefficients
 # Sortowanie zmiennych według ich wpływu (absolutna wartość statystyki t)
 sorted_coefficients <- coefficients[order(abs(coefficients[, "t value"]), decreasing = TRUE), ]
 
-# Wyświetlenie 10 najważniejszych zmiennych
-head(sorted_coefficients, 10)
+# Pobranie 10 najważniejszych zmiennych
+top_10_coefficients <- head(sorted_coefficients, 10)
+
+# Konwersja na ramkę danych
+top_10_df <- as.data.frame(top_10_coefficients)
+top_10_df$Variable <- rownames(top_10_coefficients)
+
+# Przekształcenie tabeli i wyświetlenie w ładnym formacie
+kable(top_10_df, caption = "10 najważniejszych zmiennych w modelu regresji") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 Model regresji liniowej przeprowadzony na dostępnych danych wykazał
@@ -508,9 +531,8 @@ uczniów. Model osiągnął R² = 0.6228, co oznacza, że około 62,3%
 wariancji wyników egzaminacyjnych można wyjaśnić uwzględnionymi
 zmiennymi.
 
-Najistotniejsze czynniki wpływające na wynik egzaminu
-
 #### Kluczowe wnioski:
+Najistotniejsze czynniki wpływające na wynik egzaminu
 
 1.  **Największy pozytywny wpływ na wyniki egzaminu mają:**
 
@@ -663,7 +685,7 @@ ggplot(czyste_dane, aes(x = Attendance, y = Exam_Score)) +
   theme_minimal()
 ```
 
-```{r}
+```{r taaaaak, echo=FALSE}
 # Obliczanie statystyk opisowych dla każdej oceny egzaminu
 statystyki_opisowe_oceny <- czyste_dane %>%
   group_by(grupa2) %>%
@@ -1078,6 +1100,7 @@ anova_table_korepetycje %>%
 
 ## Wnioskowanie statystyczne
 
+### Analiza rozkładu wyników egzaminu
 ```{r ggstats1, echo=FALSE}
 library(ggstatsplot)
 gghistostats(czyste_dane, 
@@ -1090,6 +1113,7 @@ gghistostats(czyste_dane,
              bf.message = FALSE
              )
 ```
+
 
 Histogram przedstawia rozkład wyników egzaminacyjnych i ukazuje sposób,
 w jaki rozkładają się wyniki wśród 6 607 obserwacji. Już na pierwszy
@@ -1117,6 +1141,7 @@ dla oszacowanej wartości średniej wynosi [17,06; 17,65], co oznacza, że
 średni wynik egzaminacyjny w populacji można oszacować z dużą precyzją i
 nie jest on efektem losowych fluktuacji.
 
+### Analiza wyników egzaminacyjnych według godzin nauki
 ```{r ggstats2, echo=FALSE}
 ggbetweenstats(
   data = czyste_dane,
@@ -1145,6 +1170,29 @@ egzaminacyjnych.
 
 Analiza wykazała, że liczba godzin nauki ma istotny wpływ na wyniki
 egzaminacyjne, ale nie jest jedynym czynnikiem determinującym sukces.
+
+### Zależność wyniku egzaminu od frekwencji
+```{r ggstats3, echo=FALSE, message=FALSE, warning=FALSE}
+ggstatsplot::ggscatterstats(
+  data = czyste_dane,
+  x = Attendance,
+  y = Exam_Score,
+  type = "spearman",
+  title = "Zależność wyniku egzaminu od frekwencji",
+  bf.message = FALSE
+)
+```
+
+Przeprowadzona analiza wykazała istotną statystycznie, umiarkowaną dodatnią korelację między frekwencją a wynikiem egzaminu (r = 0.54, p < 0.001). Oznacza to, że studenci, którzy częściej uczęszczali na zajęcia, uzyskiwali wyższe wyniki egzaminacyjne.
+
+Dodatkowo, przedział ufności dla współczynnika korelacji wynosi 95% CI [0.53, 0.56], co potwierdza stabilność oszacowanego efektu. Test t Studenta przeprowadzony w celu weryfikacji istotności związku dał wynik t(6605) = 52.75, p < 0.001, co wskazuje na silne dowody przeciwko hipotezie zerowej (braku zależności).
+
+Wykres rozrzutu przedstawia indywidualne obserwacje, gdzie każda kropka reprezentuje wynik pojedynczego studenta. Niebieska linia regresji pokazuje ogólną tendencję – wraz ze wzrostem frekwencji rosną również wyniki egzaminacyjne.
+
+Dodatkowo histogramy umieszczone na osiach wykresu prezentują rozkład zmiennych:
+
+- Histogram powyżej wykresu pokazuje, że większość studentów miała wysoką frekwencję (80–100%).
+- Histogram po prawej stronie wskazuje, że większość wyników egzaminacyjnych mieści się w przedziale 60–80 punktów.
 
 ## Podsumowanie projektu
 
