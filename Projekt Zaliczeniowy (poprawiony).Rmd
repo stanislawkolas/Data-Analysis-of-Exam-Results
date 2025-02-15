@@ -532,6 +532,7 @@ wariancji wyników egzaminacyjnych można wyjaśnić uwzględnionymi
 zmiennymi.
 
 #### Kluczowe wnioski:
+
 **Najistotniejsze czynniki wpływające na wynik egzaminu**
 
 1.  **Największy pozytywny wpływ na wyniki egzaminu mają:**
@@ -1101,6 +1102,7 @@ anova_table_korepetycje %>%
 ## Wnioskowanie statystyczne
 
 ### Analiza rozkładu wyników egzaminu
+
 ```{r ggstats1, echo=FALSE}
 library(ggstatsplot)
 gghistostats(czyste_dane, 
@@ -1113,7 +1115,6 @@ gghistostats(czyste_dane,
              bf.message = FALSE
              )
 ```
-
 
 Histogram przedstawia rozkład wyników egzaminacyjnych i ukazuje sposób,
 w jaki rozkładają się wyniki wśród 6 607 obserwacji. Już na pierwszy
@@ -1142,6 +1143,7 @@ dla oszacowanej wartości średniej wynosi [17,06; 17,65], co oznacza, że
 nie jest on efektem losowych fluktuacji.
 
 ### Analiza wyników egzaminacyjnych według godzin nauki
+
 ```{r ggstats2, echo=FALSE}
 ggbetweenstats(
   data = czyste_dane,
@@ -1172,6 +1174,7 @@ Analiza wykazała, że liczba godzin nauki ma istotny wpływ na wyniki
 egzaminacyjne, ale nie jest jedynym czynnikiem determinującym sukces.
 
 ### Zależność wyniku egzaminu od frekwencji
+
 ```{r ggstats3, echo=FALSE, message=FALSE, warning=FALSE}
 ggstatsplot::ggscatterstats(
   data = czyste_dane,
@@ -1183,16 +1186,29 @@ ggstatsplot::ggscatterstats(
 )
 ```
 
-Przeprowadzona analiza wykazała istotną statystycznie, umiarkowaną dodatnią korelację między frekwencją a wynikiem egzaminu (r = 0.54, p < 0.001). Oznacza to, że studenci, którzy częściej uczęszczali na zajęcia, uzyskiwali wyższe wyniki egzaminacyjne.
+Przeprowadzona analiza wykazała istotną statystycznie, umiarkowaną
+dodatnią korelację między frekwencją a wynikiem egzaminu (r = 0.54, p \<
+0.001). Oznacza to, że studenci, którzy częściej uczęszczali na zajęcia,
+uzyskiwali wyższe wyniki egzaminacyjne.
 
-Dodatkowo, przedział ufności dla współczynnika korelacji wynosi 95% CI [0.53, 0.56], co potwierdza stabilność oszacowanego efektu. Test t Studenta przeprowadzony w celu weryfikacji istotności związku dał wynik t(6605) = 52.75, p < 0.001, co wskazuje na silne dowody przeciwko hipotezie zerowej (braku zależności).
+Dodatkowo, przedział ufności dla współczynnika korelacji wynosi 95% CI
+[0.53, 0.56], co potwierdza stabilność oszacowanego efektu. Test t
+Studenta przeprowadzony w celu weryfikacji istotności związku dał wynik
+t(6605) = 52.75, p \< 0.001, co wskazuje na silne dowody przeciwko
+hipotezie zerowej (braku zależności).
 
-Wykres rozrzutu przedstawia indywidualne obserwacje, gdzie każda kropka reprezentuje wynik pojedynczego studenta. Niebieska linia regresji pokazuje ogólną tendencję – wraz ze wzrostem frekwencji rosną również wyniki egzaminacyjne.
+Wykres rozrzutu przedstawia indywidualne obserwacje, gdzie każda kropka
+reprezentuje wynik pojedynczego studenta. Niebieska linia regresji
+pokazuje ogólną tendencję – wraz ze wzrostem frekwencji rosną również
+wyniki egzaminacyjne.
 
-Dodatkowo histogramy umieszczone na osiach wykresu prezentują rozkład zmiennych:
+Dodatkowo histogramy umieszczone na osiach wykresu prezentują rozkład
+zmiennych:
 
-- Histogram powyżej wykresu pokazuje, że większość studentów miała wysoką frekwencję (80–100%).
-- Histogram po prawej stronie wskazuje, że większość wyników egzaminacyjnych mieści się w przedziale 60–80 punktów.
+-   Histogram powyżej wykresu pokazuje, że większość studentów miała
+    wysoką frekwencję (80–100%).
+-   Histogram po prawej stronie wskazuje, że większość wyników
+    egzaminacyjnych mieści się w przedziale 60–80 punktów.
 
 ## Podsumowanie projektu
 
@@ -1215,6 +1231,14 @@ do zasobów edukacyjnych, niski dochód rodziny oraz niskie zaangażowanie
 rodziców wiązały się z gorszymi wynikami egzaminacyjnymi. Czynniki te są
 szczególnie ważne w kontekście planowania polityk edukacyjnych i
 programów wsparcia.
+
+Dodatkowo analiza Post-Hoc wykazała, że różnice między grupami są
+istotne statystycznie, co sugeruje, że każdy z czynników ma wpływ na
+wyniki egzaminacyjne. Warto zauważyć, że wpływ poszczególnych czynników
+może być różny w zależności od kontekstu i indywidualnych predyspozycji
+uczniów. Na postawi eannalizy można stwierdzić, że próba jest
+reprezentatywna dla populacji uczniów, co pozwala na generalizację
+wyników na szerszą skalę.
 
 ### Znaczenie analizy wyników egzaminacyjnych
 
