@@ -90,6 +90,8 @@ The HTML report includes:
 - Statistical analysis results  
 - Conclusions and practical recommendations
 
+[Link to the report](https://rpubs.com/Jakub_Kolpaczynski00/1272286?fbclid=IwZXh0bgNhZW0CMTEAAR5wU2T8FQHcTPcW3zuIBQ7Cyo_myfDq4Y7diwgBMDDW-oR_gdmCCc5VnAyGAg_aem_WuWhenMJc3U3NYIXJH8OBA)
+
 ---
 
 ## 🖼 Screenshots & Visualizations
