@@ -1,6 +1,7 @@
 # 📊 Analysis of Factors Affecting Exam Performance  
 
-![KAROLE Final Banner](images:/karole_final_banner.jpg)  
+![KAROLE Final Banner](https://raw.githubusercontent.com/stanislawkolas/Data-Analysis-of-Exam-Results/refs/heads/main/images%3A/karole_final_banner.jpg)
+
 *Nomination in the 28th edition of the KAROLE Competition – Artus Court, Gdańsk, 2025*
 
 **Authors:** Bartosz Kurzyński, Jakub Kołpaczyński, Stanisław Kolas  
@@ -94,13 +95,13 @@ The HTML report includes:
 ## 🖼 Screenshots & Visualizations
 
 ### Example – Distribution of Exam Scores
-![Exam Score Distribution](images:/exam_score_histogram.png)
+![Exam Score Distribution](https://raw.githubusercontent.com/stanislawkolas/Data-Analysis-of-Exam-Results/refs/heads/main/images%3A/exam_score_histogram.png)
 
 ### Example – Relationship Between Attendance and Exam Score
-![Attendance vs Exam Score](images:/attendance_exam_correlation.png)
+![Attendance vs Exam Score](https://raw.githubusercontent.com/stanislawkolas/Data-Analysis-of-Exam-Results/refs/heads/main/images%3A/attendance_exam_correlation.png)
 
 ### Example – Influence of Study Hours
-![Study Hours Impact](images:/study_hours_boxplot.png)
+![Study Hours Impact](https://raw.githubusercontent.com/stanislawkolas/Data-Analysis-of-Exam-Results/refs/heads/main/images%3A/study_hours_boxplot.png)
 
 ---
 
